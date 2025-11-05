@@ -16,8 +16,10 @@ class ProposalStatus(enum.Enum):
 
 class User(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)
-    email: Mapped[str] = mapped_column(String(120), unique=True, nullable=False)
+    email: Mapped[str] = mapped_column(String(128), unique=True, nullable=False)
     name: Mapped[str] = mapped_column(String(50), nullable=False)
+    gender: Mapped[Optional[str]] = mapped_column(String(10), nullable=True)
+    age: Mapped[Optional[int]] = mapped_column(nullable=True)
     password_hash: Mapped[str] = mapped_column(String(128), nullable=False)
     description: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
 
@@ -37,6 +39,7 @@ class TripProposal(db.Model):
     start_date_final: Mapped[bool] = mapped_column(nullable=False, default=False)
     end_date: Mapped[datetime.datetime] = mapped_column(DateTime, nullable=False)
     end_date_final: Mapped[bool] = mapped_column(nullable=False, default=False)
+    max_participants: Mapped[int] = mapped_column(nullable=False)
     created_at: Mapped[datetime.datetime] = mapped_column(DateTime, default=func.now(), nullable=False)
     status: Mapped[ProposalStatus] = mapped_column(nullable=False, default=ProposalStatus.open)
     creator_id: Mapped[int] = mapped_column(ForeignKey("user.id"), nullable=False)
@@ -47,7 +50,7 @@ class TripProposal(db.Model):
 class TripProposalParticipation(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("user.id"), nullable=False)
-    proposal_id: Mapped[int] = mapped_column(ForeignKey("proposal.id"), nullable=False)
+    proposal_id: Mapped[int] = mapped_column(ForeignKey("trip_proposal.id"), nullable=False)
     joined_at: Mapped[datetime.datetime] = mapped_column(DateTime, default=func.now(), nullable=False)
 
     user = relationship("User")
@@ -55,7 +58,7 @@ class TripProposalParticipation(db.Model):
 
 class Meetup(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)
-    proposal_id: Mapped[int] = mapped_column(ForeignKey("proposal.id"), nullable=False)
+    proposal_id: Mapped[int] = mapped_column(ForeignKey("trip_proposal.id"), nullable=False)
     location: Mapped[str] = mapped_column(String(200), nullable=False)
     scheduled_time: Mapped[datetime.datetime] = mapped_column(DateTime, nullable=False)
 
@@ -66,7 +69,7 @@ class Message(db.Model):
     content: Mapped[str] = mapped_column(String(1000), nullable=False)
     timestamp: Mapped[datetime.datetime] = mapped_column(DateTime, default=func.now(), nullable=False)
     user_id: Mapped[int] = mapped_column(ForeignKey("user.id"), nullable=False)
-    proposal_id: Mapped[int] = mapped_column(ForeignKey("proposal.id"), nullable=False)
+    proposal_id: Mapped[int] = mapped_column(ForeignKey("trip_proposal.id"), nullable=False)
 
     user = relationship("User", back_populates="messages")
     proposal = relationship("TripProposal", back_populates="messages")
