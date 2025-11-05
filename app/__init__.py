@@ -7,6 +7,12 @@ db = SQLAlchemy(model_class=declarative_base())
 def create_app(test_config=None):
     app = Flask(__name__)
 
+    # replace with real connection string
+    app.config[
+        "SQLALCHEMY_DATABASE_URI"
+    ] = "mysql+pymysql://26_webapp_XX:YYYYYYYYY@mysql.lab.it.uc3m.es/26_webapp_XXa"
+    db.init_app(app)
+
     # A secret for signing session cookies
     app.config["SECRET_KEY"] = "93220d9b340cf9a6c39bac99cce7daf220167498f91fa"
 
