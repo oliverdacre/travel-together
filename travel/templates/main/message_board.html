@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block content %}
+<form method="post" action="{{ url_for('main.post_message', trip_id=trip_id) }}">
+    <label for="message">Leave a Message:</label><br>
+    <textarea id="message" name="message" rows="4" cols="50"></textarea><br>
+    <input type="submit" value="Post Message">
+</form>
+{% if messages %}
+    <h2>Messages:</h2>
+    <ul>
+        {% for message in messages %}
+            <li><strong>{{ message.user_id }}:</strong> {{ message.content }} <em>({{ message.timestamp }})</em></li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>No messages yet. Be the first to post!</p>
+{% endif %}
+{% endblock %}
