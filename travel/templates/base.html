@@ -1,20 +1,31 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-    <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title>Travel app</title>
-        <link rel="stylesheet"
-              href="{{ url_for('static', filename='styles.css') }}">
-    </head>
-    <body>
-        <main>
-            {% with messages = get_flashed_messages() %}
-                {% for message in messages %}
-                    <div>{{ message }}</div>
-                {% endfor %}
-            {% endwith %}
+  <head>
+    <meta charset="utf-8" />
+    <title>Travel Together</title>
+    <style>
+      .notification { padding: 8px; margin: 8px 0; border: 1px solid #ccc; }
+      nav a { margin-right: 12px; }
+    </style>
+  </head>
+  <body>
+    <nav>
+      {% if current_user.is_authenticated %}
+        <span>User: <a href="{{ url_for('main.profile', user_id=current_user.id) }}">{{ current_user.name }}</a></span>
+        <a href="{{ url_for('main.edit_profile') }}">Edit Profile</a>
+        <a href="{{ url_for('auth.logout') }}">Log out</a>
+      {% else %}
+        <a href="{{ url_for('auth.login') }}">Log in</a>
+        <a href="{{ url_for('auth.signup') }}">Sign up</a>
+      {% endif %}
+    </nav>
 
-            {% block content %}{% endblock %}
-        </main>
-    </body>
+    {% with messages = get_flashed_messages() %}
+      {% for message in messages %}
+        <div class="notification">{{ message }}</div>
+      {% endfor %}
+    {% endwith %}
+
+    {% block content %}{% endblock %}
+  </body>
 </html>

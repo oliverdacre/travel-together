@@ -1,6 +1,7 @@
 import datetime
 from typing import List, Optional
 
+import flask_login
 from sqlalchemy import String, DateTime, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql import func
@@ -14,7 +15,7 @@ class ProposalStatus(enum.Enum):
     finalized = 3
     cancelled = 4
 
-class User(db.Model):
+class User(flask_login.UserMixin, db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)
     email: Mapped[str] = mapped_column(String(128), unique=True, nullable=False)
     name: Mapped[str] = mapped_column(String(50), nullable=False)
@@ -22,6 +23,8 @@ class User(db.Model):
     age: Mapped[Optional[int]] = mapped_column(nullable=True)
     password_hash: Mapped[str] = mapped_column(String(128), nullable=False)
     description: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
+    created_trip_proposals: Mapped[List["TripProposal"]] = relationship("TripProposal", back_populates="creator", foreign_keys="TripProposal.creator_id")
+    messages: Mapped[List["Message"]] = relationship("Message", back_populates="user")
 
 class TripProposal(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -45,7 +48,8 @@ class TripProposal(db.Model):
     creator_id: Mapped[int] = mapped_column(ForeignKey("user.id"), nullable=False)
     creator: Mapped["User"] = relationship("User", back_populates="created_trip_proposals")
     meetups: Mapped[List["Meetup"]] = relationship(back_populates="proposal")
-    # participants: Mapped[List["User"]] = relationship(back_populates="trip_proposals")
+    participants: Mapped[List["TripProposalParticipation"]] = relationship("TripProposalParticipation", back_populates="proposal")
+    messages: Mapped[List["Message"]] = relationship("Message", back_populates="proposal")
 
 class TripProposalParticipation(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)
