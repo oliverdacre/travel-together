@@ -10,7 +10,7 @@
     <h2>Messages:</h2>
     <ul>
         {% for message in messages %}
-            <li><strong>{{ message.user_id }}:</strong> {{ message.content }} <em>({{ message.timestamp }})</em></li>
+            <li><strong>{{ message.user.name }}:</strong> {{ message.content }} <em>({{ message.timestamp }})</em></li>
         {% endfor %}
     </ul>
 {% else %}
