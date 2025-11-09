@@ -23,8 +23,12 @@ class User(flask_login.UserMixin, db.Model):
     age: Mapped[Optional[int]] = mapped_column(nullable=True)
     password_hash: Mapped[str] = mapped_column(String(128), nullable=False)
     description: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
-    created_trip_proposals: Mapped[List["TripProposal"]] = relationship("TripProposal", back_populates="creator", foreign_keys="TripProposal.creator_id")
+
+    created_trip_proposals: Mapped[List["TripProposal"]] = relationship("TripProposal", back_populates="creator")
     messages: Mapped[List["Message"]] = relationship("Message", back_populates="user")
+    participations: Mapped[List["TripProposalParticipation"]] = relationship(
+        "TripProposalParticipation", back_populates="user"
+    )
 
 class TripProposal(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -47,8 +51,10 @@ class TripProposal(db.Model):
     status: Mapped[ProposalStatus] = mapped_column(nullable=False, default=ProposalStatus.open)
     creator_id: Mapped[int] = mapped_column(ForeignKey("user.id"), nullable=False)
     creator: Mapped["User"] = relationship("User", back_populates="created_trip_proposals")
-    meetups: Mapped[List["Meetup"]] = relationship(back_populates="proposal")
-    participants: Mapped[List["TripProposalParticipation"]] = relationship("TripProposalParticipation", back_populates="proposal")
+    meetups: Mapped[List["Meetup"]] = relationship("Meetup", back_populates="proposal")
+    participants: Mapped[List["TripProposalParticipation"]] = relationship(
+        "TripProposalParticipation", back_populates="proposal"
+    )
     messages: Mapped[List["Message"]] = relationship("Message", back_populates="proposal")
 
 class TripProposalParticipation(db.Model):
@@ -57,7 +63,7 @@ class TripProposalParticipation(db.Model):
     proposal_id: Mapped[int] = mapped_column(ForeignKey("trip_proposal.id"), nullable=False)
     joined_at: Mapped[datetime.datetime] = mapped_column(DateTime, default=func.now(), nullable=False)
 
-    user = relationship("User")
+    user = relationship("User", back_populates="participations")
     proposal = relationship("TripProposal", back_populates="participants")
 
 class Meetup(db.Model):

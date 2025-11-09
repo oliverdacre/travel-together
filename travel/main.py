@@ -1,8 +1,7 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, abort
+from flask import Blueprint, render_template, redirect, url_for, request, flash, abort
 import flask_login
-
 from . import db
-from . import model
+from .model import User, Message
 
 bp = Blueprint("main", __name__)
 
@@ -14,7 +13,7 @@ def index():
 @bp.route("/profile/<int:user_id>")
 @flask_login.login_required
 def profile(user_id):
-    user = db.session.get(model.User, user_id)
+    user = db.session.get(User, user_id)
     if not user:
         abort(404)
     return render_template("main/profile.html", user=user)
@@ -41,3 +40,17 @@ def edit_profile_post():
     
     flash("Profile updated successfully!")
     return redirect(url_for("main.profile", user_id=current_user.id))
+
+@bp.route("/trip/<int:trip_id>/message_board")
+def message_board(trip_id):
+    query = db.select(Message).where(Message.proposal_id == trip_id).order_by(Message.timestamp)
+    messages = db.session.execute(query).scalars().all()
+    return render_template("main/message_board.html", trip_id=trip_id, messages=messages)
+
+@bp.route("/trip/<int:trip_id>/message_board", methods=["POST"])
+def post_message(trip_id):
+    message = request.form.get("message")
+    new_message = Message(content=message, user_id=1, proposal_id=trip_id)  # Assuming user_id=1 for simplicity
+    db.session.add(new_message)
+    db.session.commit()
+    return redirect( url_for("main.message_board", trip_id=trip_id) )
