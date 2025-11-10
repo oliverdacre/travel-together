@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>{{ proposal.title }}</h1>
+
+<p><strong>Description:</strong><br>
+  {{ proposal.description or "No description provided." }}
+</p>
+
+<p><strong>Destination:</strong> {{ proposal.destination }}</p>
+
+<p><strong>Budget:</strong> 
+  {% if proposal.budget %}
+    {{ proposal.budget }} 
+  {% else %}
+    Not specified
+  {% endif %}
+</p>
+
+<p><strong>Departure locations:</strong>
+  {% if proposal.departure_locations %}
+    {{ proposal.departure_locations }}
+  {% else %}
+    Not specified
+  {% endif %}
+</p>
+
+<p><strong>Activities:</strong>
+  {% if proposal.activities %}
+    {{ proposal.activities }}
+  {% else %}
+    Not specified
+  {% endif %}
+</p>
+
+<p><strong>Start date:</strong> {{ proposal.start_date.strftime('%Y-%m-%d') }}</p>
+
+<p><strong>End date:</strong> {{ proposal.end_date.strftime('%Y-%m-%d') }}</p>
+
+<p><strong>Max participants:</strong> {{ proposal.max_participants }}</p>
+<p><strong>Status:</strong> {{ proposal.status.name }}</p>
+
+<p><strong>Created at:</strong> {{ proposal.created_at.strftime('%Y-%m-%d %H:%M') }}</p>
+
+<p><strong>Created by:</strong>
+  <a href="{{ url_for('main.profile', user_id=proposal.creator.id) }}">
+    {{ proposal.creator.name }}
+  </a>
+</p>
+
+<hr>
+
+<a href="{{ url_for('trip.list_all') }}">← Back to all trip proposals</a>
+
+{% endblock %}
