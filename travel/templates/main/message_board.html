@@ -1,19 +1,110 @@
 {% extends "base.html" %}
 
 {% block content %}
-<form method="post" action="{{ url_for('main.post_message', trip_id=trip_id) }}">
+<form method="post" action="{{ url_for('main.post_message', trip_id=trip_id) }}" id="messageForm">
     <label for="message">Leave a Message:</label><br>
-    <textarea id="message" name="message" rows="4" cols="50"></textarea><br>
+    <textarea id="message" name="message" rows="4" cols="50" required></textarea><br>
     <input type="submit" value="Post Message">
 </form>
 {% if messages %}
     <h2>Messages:</h2>
-    <ul>
+    <ul id="messageList">
         {% for message in messages %}
-            <li><strong>{{ message.user.name }}:</strong> {{ message.content }} <em>({{ message.timestamp }})</em></li>
+            <li data-message-id="{{ message.id }}">
+                <strong>{{ message.user.name }}:</strong> {{ message.content }} 
+                <em>({{ message.timestamp.strftime('%Y-%m-%d %H:%M:%S') }})</em>
+            </li>
         {% endfor %}
     </ul>
 {% else %}
-    <p>No messages yet. Be the first to post!</p>
+    <h2>Messages:</h2>
+    <ul id="messageList">
+        <li id="noMessages">No messages yet. Be the first to post!</li>
+    </ul>
 {% endif %}
+
+<script>
+    let lastMessageId = {{ messages[-1].id if messages else 0 }};
+    const tripId = {{ trip_id }};
+    const pollInterval = 3000; // 3 seconds
+
+    function fetchNewMessages() {
+        fetch(`/trip/${tripId}/messages/since/${lastMessageId}`)
+            .then(response => response.json())
+            .then(newMessages => {
+                if (newMessages.length > 0) {
+                    const messageList = document.getElementById('messageList');
+                    const noMessages = document.getElementById('noMessages');
+                    
+                    // Remove "no messages" placeholder if it exists
+                    if (noMessages) {
+                        noMessages.remove();
+                    }
+                    
+                    // Add new messages
+                    newMessages.forEach(msg => {
+                        const li = document.createElement('li');
+                        li.setAttribute('data-message-id', msg.id);
+                        
+                        // Escape HTML for security
+                        const strong = document.createElement('strong');
+                        strong.textContent = msg.user_name + ':';
+                        
+                        const em = document.createElement('em');
+                        em.textContent = `(${msg.timestamp})`;
+                        
+                        // Assemble the message
+                        li.appendChild(strong);
+                        li.appendChild(document.createTextNode(' ' + msg.content + ' '));
+                        li.appendChild(em);
+                        
+                        messageList.appendChild(li);
+                        
+                        // Update lastMessageId
+                        lastMessageId = Math.max(lastMessageId, msg.id);
+                    });
+                    
+                    // Optional: Scroll to bottom
+                    messageList.scrollIntoView({ behavior: 'smooth', block: 'end' });
+                }
+            })
+            .catch(error => console.error('Error fetching messages:', error));
+    }
+
+    // Start polling
+    setInterval(fetchNewMessages, pollInterval);
+
+    // // Handle form submission with AJAX (optional - prevents page reload)
+    // document.getElementById('messageForm').addEventListener('submit', function(e) {
+    //     e.preventDefault();
+        
+    //     const textarea = document.getElementById('message');
+    //     const messageContent = textarea.value.trim();
+        
+    //     if (!messageContent) {
+    //         return;
+    //     }
+        
+    //     const formData = new FormData();
+    //     formData.append('message', messageContent);
+        
+    //     fetch(`/trip/${tripId}/message_board`, {
+    //         method: 'POST',
+    //         body: formData
+    //     })
+    //     .then(response => {
+    //         if (response.ok) {
+    //             textarea.value = '';
+    //             // Immediately fetch new messages
+    //             setTimeout(fetchNewMessages, 500);
+    //         } else {
+    //             alert('Failed to send message');
+    //         }
+    //     })
+    //     .catch(error => {
+    //         console.error('Error sending message:', error);
+    //         alert('Failed to send message');
+    //     });
+    // });
+</script>
 {% endblock %}
