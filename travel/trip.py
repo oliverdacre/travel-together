@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, redirect, url_for, request, flash,
 import flask_login
 from datetime import datetime
 from . import db
-from .model import TripProposal, ProposalStatus
+from .model import TripProposal, ProposalStatus, TripProposalParticipation
 
 bp = Blueprint("trip", __name__, url_prefix="/trip")
 
@@ -75,6 +75,12 @@ def new_trip_post():
     db.session.add(new_proposal)
     db.session.commit()
 
+    creator_participation = TripProposalParticipation(
+        user_id=current_user.id, proposal_id=new_proposal.id
+    )
+    db.session.add(creator_participation)
+    db.session.commit()
+
     flash("Trip proposal created successfully!")
     return redirect(url_for("trip.detail", trip_id=new_proposal.id))
 
@@ -85,7 +91,71 @@ def detail(trip_id):
     proposal = db.session.get(TripProposal, trip_id)
     if not proposal:
         abort(404)
-    return render_template("trip/detail.html", proposal=proposal)
+
+    current_user = flask_login.current_user
+
+    participation = db.session.execute(
+        db.select(TripProposalParticipation).where(
+            TripProposalParticipation.proposal_id == trip_id,
+            TripProposalParticipation.user_id == current_user.id,
+        )
+    ).scalar_one_or_none()
+
+    is_participant = participation is not None or proposal.creator_id == current_user.id
+
+    participants = []
+    if is_participant:
+        participants = (
+            db.session.execute(
+                db.select(TripProposalParticipation).where(
+                    TripProposalParticipation.proposal_id == trip_id
+                )
+            ).scalars().all()
+        )
+
+    return render_template(
+        "trip/detail.html",
+        proposal=proposal,
+        participants=participants,
+        is_participant=is_participant,
+    )
+
+
+@bp.route("/<int:trip_id>/join", methods=["POST"])
+@flask_login.login_required
+def join_trip(trip_id):
+    proposal = db.session.get(TripProposal, trip_id)
+    if not proposal:
+        abort(404)
+
+    user = flask_login.current_user
+
+    already_joined = db.session.execute(
+        db.select(TripProposalParticipation).where(
+            TripProposalParticipation.user_id == user.id,
+            TripProposalParticipation.proposal_id == trip_id,
+        )
+    ).scalar_one_or_none()
+
+    if already_joined:
+        flash("You are already a participant of this trip.")
+        return redirect(url_for("trip.detail", trip_id=trip_id))
+
+    current_count = db.session.execute(
+        db.select(TripProposalParticipation).where(
+            TripProposalParticipation.proposal_id == trip_id
+        )
+    ).scalars().all()
+    if len(current_count) >= proposal.max_participants:
+        flash("This trip is already full.")
+        return redirect(url_for("trip.detail", trip_id=trip_id))
+
+    participation = TripProposalParticipation(user_id=user.id, proposal_id=trip_id)
+    db.session.add(participation)
+    db.session.commit()
+
+    flash("You have successfully joined the trip!")
+    return redirect(url_for("trip.detail", trip_id=trip_id))
 
 
 @bp.route("/all")
@@ -93,3 +163,28 @@ def detail(trip_id):
 def list_all():
     trips = db.session.execute(db.select(TripProposal)).scalars().all()
     return render_template("trip/list.html", trips=trips)
+
+
+@bp.route("/my_trips")
+@flask_login.login_required
+def my_trips():
+    current_user = flask_login.current_user
+
+    created_trips = (
+        db.session.execute(
+            db.select(TripProposal).where(TripProposal.creator_id == current_user.id)
+        ).scalars().all()
+    )
+
+    joined_participations = (
+        db.session.execute(
+            db.select(TripProposalParticipation).where(
+                TripProposalParticipation.user_id == current_user.id
+            )
+        ).scalars().all()
+    )
+    joined_trips = [p.proposal for p in joined_participations]
+
+    all_trips = {t.id: t for t in created_trips + joined_trips}.values()
+
+    return render_template("trip/my_trips.html", trips=all_trips)
