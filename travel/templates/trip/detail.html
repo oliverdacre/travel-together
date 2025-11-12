@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>{{ proposal.title }}</h1>
+
+<hr>
+
+<h2>Details</h2>
+
+<p><strong>Description:</strong><br>
+  {{ proposal.description or "No description provided." }}
+</p>
+
+<p><strong>Destination:</strong> {{ proposal.destination or "Not specified" }}</p>
+
+{% if proposal.budget %}
+  <p><strong>Budget:</strong> {{ proposal.budget }} EUR</p>
+{% endif %}
+
+{% if proposal.departure_locations %}
+  <p><strong>Departure locations:</strong> {{ proposal.departure_locations }}</p>
+{% endif %}
+
+{% if proposal.activities %}
+  <p><strong>Planned activities:</strong> {{ proposal.activities }}</p>
+{% endif %}
+
+<p><strong>Start date:</strong> {{ proposal.start_date.strftime('%Y-%m-%d') }}</p>
+<p><strong>End date:</strong> {{ proposal.end_date.strftime('%Y-%m-%d') }}</p>
+
+<p><strong>Max participants:</strong> {{ proposal.max_participants }}</p>
+<p><strong>Status:</strong> {{ proposal.status.name }}</p>
+
+<p><strong>Created by:</strong>
+  <a href="{{ url_for('main.profile', user_id=proposal.creator.id) }}">
+    {{ proposal.creator.name }}
+  </a>
+</p>
+
+<hr>
+
+{% if is_participant %}
+  <h2>Participants</h2>
+  {% if participants %}
+    <ul>
+      {% for p in participants %}
+        <li>
+          <a href="{{ url_for('main.profile', user_id=p.user.id) }}">{{ p.user.name }}</a>
+          (joined {{ p.joined_at.strftime('%Y-%m-%d %H:%M') }})
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>No participants yet.</p>
+  {% endif %}
+{% else %}
+  <form action="{{ url_for('trip.join_trip', trip_id=proposal.id) }}" method="post">
+    <button type="submit">Join trip</button>
+  </form>
+{% endif %}
+
+<hr>
+
+<h2>Discussion</h2>
+<p>
+  <a href="{{ url_for('main.message_board', trip_id=proposal.id) }}">
+    Go to message board →
+  </a>
+</p>
+
+<hr>
+
+<a href="{{ url_for('trip.list_all') }}">← Back to all trip proposals</a>
+{% endblock %}

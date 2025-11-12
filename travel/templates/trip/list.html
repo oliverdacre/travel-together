@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>All Trip Proposals</h1>
+<ul>
+  {% for t in trips %}
+    <li>
+      <a href="{{ url_for('trip.detail', trip_id=t.id) }}">{{ t.title }}</a>
+      – {{ t.destination }} ({{ t.start_date.strftime('%Y-%m-%d') }} → {{ t.end_date.strftime('%Y-%m-%d') }})
+    </li>
+  {% else %}
+    <li>No trips yet.</li>
+  {% endfor %}
+</ul>
+{% endblock %}

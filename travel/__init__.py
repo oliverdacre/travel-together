@@ -36,6 +36,9 @@ def create_app():
     from . import auth
     app.register_blueprint(auth.bp)
 
+    from . import trip
+    app.register_blueprint(trip.bp)
+
     # Add template filter for user profile links
     @app.template_filter('user_link')
     def user_link_filter(user):
