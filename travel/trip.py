@@ -170,12 +170,6 @@ def list_all():
 def my_trips():
     current_user = flask_login.current_user
 
-    created_trips = (
-        db.session.execute(
-            db.select(TripProposal).where(TripProposal.creator_id == current_user.id)
-        ).scalars().all()
-    )
-
     joined_participations = (
         db.session.execute(
             db.select(TripProposalParticipation).where(
@@ -185,6 +179,4 @@ def my_trips():
     )
     joined_trips = [p.proposal for p in joined_participations]
 
-    all_trips = {t.id: t for t in created_trips + joined_trips}.values()
-
-    return render_template("trip/my_trips.html", trips=all_trips)
+    return render_template("trip/my_trips.html", trips=joined_trips)
