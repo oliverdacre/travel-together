@@ -1,11 +1,6 @@
 {% extends "base.html" %}
 
 {% block content %}
-<form method="post" action="{{ url_for('main.post_message', trip_id=trip_id) }}" id="messageForm">
-    <label for="message">Leave a Message:</label><br>
-    <textarea id="message" name="message" rows="4" cols="50" required></textarea><br>
-    <input type="submit" value="Post Message">
-</form>
 {% if messages %}
     <h2>Messages:</h2>
     <ul id="messageList">
@@ -23,86 +18,88 @@
     </ul>
 {% endif %}
 
+<form method="post" action="{{ url_for('main.post_message', trip_id=trip_id) }}" id="messageForm">
+    <label for="message">Leave a Message:</label><br>
+    <textarea id="message" name="message" rows="4" cols="50" required></textarea><br>
+    <input type="submit" value="Post Message">
+</form>
+
 <script>
     let lastMessageId = {{ messages[-1].id if messages else 0 }};
     const tripId = {{ trip_id }};
     const pollInterval = 3000; // 3 seconds
 
     function fetchNewMessages() {
-        fetch(`/trip/${tripId}/messages/since/${lastMessageId}`)
-            .then(response => response.json())
-            .then(newMessages => {
+        $.ajax({
+            url: `/trip/${tripId}/messages/since/${lastMessageId}`,
+            type: 'GET',
+            dataType: 'json',
+            success: function(newMessages) {
                 if (newMessages.length > 0) {
-                    const messageList = document.getElementById('messageList');
-                    const noMessages = document.getElementById('noMessages');
+                    const $messageList = $('#messageList');
+                    const $noMessages = $('#noMessages');
                     
                     // Remove "no messages" placeholder if it exists
-                    if (noMessages) {
-                        noMessages.remove();
+                    if ($noMessages.length) {
+                        $noMessages.remove();
                     }
                     
                     // Add new messages
-                    newMessages.forEach(msg => {
-                        const li = document.createElement('li');
-                        li.setAttribute('data-message-id', msg.id);
+                    $.each(newMessages, function(index, msg) {
+                        const $li = $('<li>')
+                            .attr('data-message-id', msg.id);
                         
                         // Escape HTML for security
-                        const strong = document.createElement('strong');
-                        strong.textContent = msg.user_name + ':';
-                        
-                        const em = document.createElement('em');
-                        em.textContent = `(${msg.timestamp})`;
+                        const $strong = $('<strong>').text(msg.user_name + ':');
+                        const $em = $('<em>').text(`(${msg.timestamp})`);
                         
                         // Assemble the message
-                        li.appendChild(strong);
-                        li.appendChild(document.createTextNode(' ' + msg.content + ' '));
-                        li.appendChild(em);
+                        $li.append($strong)
+                           .append(' ' + $('<div>').text(msg.content).html() + ' ')
+                           .append($em);
                         
-                        messageList.appendChild(li);
+                        $messageList.append($li);
                         
                         // Update lastMessageId
                         lastMessageId = Math.max(lastMessageId, msg.id);
                     });
                     
                     // Optional: Scroll to bottom
-                    messageList.scrollIntoView({ behavior: 'smooth', block: 'end' });
+                    $messageList[0].scrollIntoView({ behavior: 'smooth', block: 'end' });
                 }
-            })
-            .catch(error => console.error('Error fetching messages:', error));
+            },
+            error: function(error) {
+                console.error('Error fetching messages:', error);
+            }
+        });
     }
 
     // Start polling
     setInterval(fetchNewMessages, pollInterval);
 
     // Handle form submission with AJAX (optional - prevents page reload)
-    document.getElementById('messageForm').addEventListener('submit', function(event) {
+    $('#messageForm').on('submit', function(event) {
         event.preventDefault();
         
-        const textarea = document.getElementById('message');
-        const messageContent = textarea.value.trim();
+        const $textarea = $('#message');
+        const messageContent = $textarea.val().trim();
         
         if (!messageContent) {
             return;
         }
         
-        const formData = new FormData();
-        formData.append('message', messageContent);
-        
-        fetch(`/trip/${tripId}/message_board`, {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => {
-            if (response.ok) {
-                textarea.value = '';
+        $.ajax({
+            url: `/trip/${tripId}/message_board`,
+            type: 'POST',
+            data: { message: messageContent },
+            success: function(response) {
+                $textarea.val('');
                 setTimeout(fetchNewMessages, 500);
-            } else {
+            },
+            error: function(error) {
+                console.error('Error sending message:', error);
                 alert('Failed to send message');
             }
-        })
-        .catch(error => {
-            console.error('Error sending message:', error);
-            alert('Failed to send message');
         });
     });
 </script>
