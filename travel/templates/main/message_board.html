@@ -6,8 +6,9 @@
     <ul id="messageList">
         {% for message in messages %}
             <li data-message-id="{{ message.id }}">
-                <strong>{{ message.user.name }}:</strong> {{ message.content }} 
-                <em>({{ message.timestamp.strftime('%Y-%m-%d %H:%M:%S') }})</em>
+                <a href="{{ url_for('profile.profile', user_id=message.user.id) }}"><strong>{{ message.user.name }}</strong></a>: 
+                {{ message.content }} 
+                <em>({{ message.timestamp.strftime('%Y-%m-%d %H:%M') }})</em>
             </li>
         {% endfor %}
     </ul>
