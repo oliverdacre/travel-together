@@ -99,7 +99,6 @@ def post_message(trip_id):
 @bp.route("/trip/<int:trip_id>/messages/since/<int:message_id>")
 @flask_login.login_required
 def get_messages_since(trip_id, message_id):
-    """API endpoint to fetch messages since a given message ID"""
     # Ensure the trip exists
     proposal = db.session.get(TripProposal, trip_id)
     if not proposal:

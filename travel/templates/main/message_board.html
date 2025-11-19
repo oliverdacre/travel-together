@@ -74,37 +74,36 @@
     // Start polling
     setInterval(fetchNewMessages, pollInterval);
 
-    // // Handle form submission with AJAX (optional - prevents page reload)
-    // document.getElementById('messageForm').addEventListener('submit', function(e) {
-    //     e.preventDefault();
+    // Handle form submission with AJAX (optional - prevents page reload)
+    document.getElementById('messageForm').addEventListener('submit', function(event) {
+        event.preventDefault();
         
-    //     const textarea = document.getElementById('message');
-    //     const messageContent = textarea.value.trim();
+        const textarea = document.getElementById('message');
+        const messageContent = textarea.value.trim();
         
-    //     if (!messageContent) {
-    //         return;
-    //     }
+        if (!messageContent) {
+            return;
+        }
         
-    //     const formData = new FormData();
-    //     formData.append('message', messageContent);
+        const formData = new FormData();
+        formData.append('message', messageContent);
         
-    //     fetch(`/trip/${tripId}/message_board`, {
-    //         method: 'POST',
-    //         body: formData
-    //     })
-    //     .then(response => {
-    //         if (response.ok) {
-    //             textarea.value = '';
-    //             // Immediately fetch new messages
-    //             setTimeout(fetchNewMessages, 500);
-    //         } else {
-    //             alert('Failed to send message');
-    //         }
-    //     })
-    //     .catch(error => {
-    //         console.error('Error sending message:', error);
-    //         alert('Failed to send message');
-    //     });
-    // });
+        fetch(`/trip/${tripId}/message_board`, {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            if (response.ok) {
+                textarea.value = '';
+                setTimeout(fetchNewMessages, 500);
+            } else {
+                alert('Failed to send message');
+            }
+        })
+        .catch(error => {
+            console.error('Error sending message:', error);
+            alert('Failed to send message');
+        });
+    });
 </script>
 {% endblock %}
