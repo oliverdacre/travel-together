@@ -39,6 +39,9 @@ def create_app():
     from . import trip
     app.register_blueprint(trip.bp)
 
+    from . import profile
+    app.register_blueprint(profile.bp)
+
     # Add template filter for user profile links
     @app.template_filter('user_link')
     def user_link_filter(user):
@@ -46,7 +49,7 @@ def create_app():
         if user:
             from flask import url_for
             from markupsafe import Markup
-            link = f'<a href="{url_for("main.profile", user_id=user.id)}">{user.name}</a>'
+            link = f'<a href="{url_for("profile.profile", user_id=user.id)}">{user.name}</a>'
             return Markup(link)
         return Markup('')
 

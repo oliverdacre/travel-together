@@ -12,8 +12,8 @@
   <body>
     <nav>
       {% if current_user.is_authenticated %}
-        <span>User: <a href="{{ url_for('main.profile', user_id=current_user.id) }}">{{ current_user.name }}</a></span>
-        <a href="{{ url_for('main.edit_profile') }}">Edit Profile</a>
+        <span>User: <a href="{{ url_for('profile.profile', user_id=current_user.id) }}">{{ current_user.name }}</a></span>
+        <a href="{{ url_for('profile.edit_profile') }}">Edit Profile</a>
         <a href="{{ url_for('trip.new_trip') }}">New Trip</a>
         <a href="{{ url_for('trip.list_all') }}">All Trips</a>
         <a href="{{ url_for('trip.my_trips') }}">My Trips</a>

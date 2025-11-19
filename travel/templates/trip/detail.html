@@ -31,7 +31,7 @@
 <p><strong>Status:</strong> {{ proposal.status.name }}</p>
 
 <p><strong>Created by:</strong>
-  <a href="{{ url_for('main.profile', user_id=proposal.creator_id) }}">
+  <a href="{{ url_for('profile.profile', user_id=proposal.creator_id) }}">
     {{ proposal.creator.name }}
   </a>
 </p>
@@ -44,7 +44,7 @@
     <ul>
       {% for p in participants %}
         <li>
-          <a href="{{ url_for('main.profile', user_id=p.user.id) }}">{{ p.user.name }}</a>
+          <a href="{{ url_for('profile.profile', user_id=p.user.id) }}">{{ p.user.name }}</a>
           (joined {{ p.joined_at.strftime('%Y-%m-%d %H:%M') }})
         </li>
       {% endfor %}

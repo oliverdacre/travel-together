@@ -24,7 +24,7 @@
 </div>
 
 {% if current_user.id == user.id %}
-  <p><a href="{{ url_for('main.edit_profile') }}">Edit your profile</a></p>
+  <p><a href="{{ url_for('profile.edit_profile') }}">Edit your profile</a></p>
 {% endif %}
 
 <p><a href="{{ url_for('main.index') }}">Back to home</a></p>
