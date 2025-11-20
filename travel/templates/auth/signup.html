@@ -1,13 +1,29 @@
 {% extends 'base.html' %}
 {% block content %}
-  <h2>Sign Up!!!</h2>
+<div class="card" style="max-width: 400px; margin: 2rem auto;">
+  <h2>✨ Sign Up</h2>
   <form action="{{ url_for('auth.signup') }}" method="post">
-    <div><label>Email: <input type="email" name="email" required/></label></div>
-    <div><label>User name: <input type="text" name="username" required/></label></div>
-    <div><label>Password: <input type="password" name="password" required/></label></div>
-    <div><label>Repeat password: <input type="password" name="password_repeat" required/></label></div>
-    <div><input type="submit" value="Sign Up"/></div>
+    <div class="form-group">
+      <label for="email">📧 Email:</label>
+      <input type="email" id="email" name="email" required/>
+    </div>
+    <div class="form-group">
+      <label for="username">👤 User name:</label>
+      <input type="text" id="username" name="username" required/>
+    </div>
+    <div class="form-group">
+      <label for="password">🔑 Password:</label>
+      <input type="password" id="password" name="password" required/>
+    </div>
+    <div class="form-group">
+      <label for="password_repeat">🔑 Repeat password:</label>
+      <input type="password" id="password_repeat" name="password_repeat" required/>
+    </div>
+    <div class="form-group">
+      <button type="submit" class="btn btn-primary" style="width: 100%;">🚀 Sign Up</button>
+    </div>
   </form>
-  <p>Already have an account? <a href="{{ url_for('auth.login') }}">Log in</a></p>
+  <p class="text-center">Already have an account? <a href="{{ url_for('auth.login') }}">🔐 Log in</a></p>
+</div>
 {% endblock %}
 

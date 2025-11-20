@@ -1,19 +1,27 @@
 {% extends "base.html" %}
 {% block content %}
-<h1>My Trips</h1>
+<h1>🗺️ My Trips</h1>
 
 {% if trips %}
-  <ul>
-    {% for trip in trips %}
-      <li>
-        <a href="{{ url_for('trip.detail', trip_id=trip.id) }}">{{ trip.title }}</a>
-        — {{ trip.destination }} ({{ trip.start_date.strftime('%Y-%m-%d') }} → {{ trip.end_date.strftime('%Y-%m-%d') }})
-      </li>
-    {% endfor %}
-  </ul>
+  {% for trip in trips %}
+    <div class="trip-card">
+      <h2 class="trip-title">
+        <a href="{{ url_for('trip.detail', trip_id=trip.id) }}">✈️ {{ trip.title }}</a>
+      </h2>
+      <div class="trip-meta">
+        <span>📍 {{ trip.destination }}</span>
+        <span>📅 {{ trip.start_date.strftime('%Y-%m-%d') }} → {{ trip.end_date.strftime('%Y-%m-%d') }}</span>
+      </div>
+      <a href="{{ url_for('trip.detail', trip_id=trip.id) }}" class="btn btn-primary">🔍 View Details</a>
+    </div>
+  {% endfor %}
 {% else %}
-  <p>You haven’t joined or created any trips yet.</p>
+  <div class="card">
+    <p class="text-center text-muted">🌍 You haven't joined or created any trips yet. <a href="{{ url_for('trip.new_trip') }}">Create your first trip! ✨</a></p>
+  </div>
 {% endif %}
 
-<a href="{{ url_for('trip.list_all') }}">← Browse all trips</a>
+<p class="mt-md">
+  <a href="{{ url_for('trip.list_all') }}" class="btn btn-link">← 🗺️ Browse all trips</a>
+</p>
 {% endblock %}

@@ -1,6 +1,12 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1>Hi {{ current_user.name }}!</h1>
-<p>Welcome to Travel Together - Plan and share your travel experiences with others.</p>
+<div class="card text-center">
+  <h1>Hi {{ current_user.name }}! 👋</h1>
+  <p>Welcome to Travel Together - Plan and share your travel experiences with others.</p>
+  <div class="mt-md">
+    <a href="{{ url_for('trip.new_trip') }}" class="btn btn-primary">Create New Trip</a>
+    <a href="{{ url_for('trip.list_all') }}" class="btn btn-secondary">Browse All Trips</a>
+  </div>
+</div>
 {% endblock %}

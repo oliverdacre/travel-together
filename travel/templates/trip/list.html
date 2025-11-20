@@ -1,14 +1,20 @@
 {% extends "base.html" %}
 {% block content %}
-<h1>All Trip Proposals</h1>
-<ul>
-  {% for t in trips %}
-    <li>
-      <a href="{{ url_for('trip.detail', trip_id=t.id) }}">{{ t.title }}</a>
-      – {{ t.destination }} ({{ t.start_date.strftime('%Y-%m-%d') }} → {{ t.end_date.strftime('%Y-%m-%d') }})
-    </li>
-  {% else %}
-    <li>No trips yet.</li>
-  {% endfor %}
-</ul>
+<h1>🗺️ All Trip Proposals</h1>
+{% for t in trips %}
+  <div class="trip-card">
+    <h2 class="trip-title">
+      <a href="{{ url_for('trip.detail', trip_id=t.id) }}">✈️ {{ t.title }}</a>
+    </h2>
+    <div class="trip-meta">
+      <span>📍 {{ t.destination }}</span>
+      <span>📅 {{ t.start_date.strftime('%Y-%m-%d') }} → {{ t.end_date.strftime('%Y-%m-%d') }}</span>
+    </div>
+    <a href="{{ url_for('trip.detail', trip_id=t.id) }}" class="btn btn-primary">🔍 View Details</a>
+  </div>
+{% else %}
+  <div class="card">
+    <p class="text-center text-muted">🌍 No trips yet. <a href="{{ url_for('trip.new_trip') }}">Create the first one! ✨</a></p>
+  </div>
+{% endfor %}
 {% endblock %}

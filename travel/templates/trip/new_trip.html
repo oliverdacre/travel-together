@@ -1,44 +1,51 @@
 {% extends "base.html" %}
 {% block content %}
-<h1>Create a New Trip Proposal</h1>
+<div class="card">
+  <h1>✈️ Create a New Trip Proposal</h1>
+</div>
 
-<form method="POST">
-  <p>
-    <label>Title*</label><br>
-    <input type="text" name="title" maxlength="100" required>
-  </p>
-  <p>
-    <label>Description</label><br>
-    <textarea name="description" maxlength="500" rows="4" cols="50"></textarea>
-  </p>
-  <p>
-    <label>Destination*</label><br>
-    <input type="text" name="destination" maxlength="100" required>
-  </p>
-  <p>
-    <label>Budget</label><br>
-    <input type="number" step="0.01" name="budget">
-  </p>
-  <p>
-    <label>Departure locations (comma-separated)</label><br>
-    <input type="text" name="departure_locations" maxlength="200">
-  </p>
-  <p>
-    <label>Activities (comma-separated)</label><br>
-    <input type="text" name="activities" maxlength="200">
-  </p>
-  <p>
-    <label>Start date*</label><br>
-    <input type="date" name="start_date" required>
-  </p>
-  <p>
-    <label>End date*</label><br>
-    <input type="date" name="end_date" required>
-  </p>
-  <p>
-    <label>Max participants*</label><br>
-    <input type="number" name="max_participants" required min="1">
-  </p>
-  <p><button type="submit">Create</button></p>
-</form>
+<div class="card">
+  <form method="POST">
+    <div class="form-group">
+      <label for="title">📝 Title*</label>
+      <input type="text" id="title" name="title" maxlength="100" required>
+    </div>
+    <div class="form-group">
+      <label for="description">📄 Description</label>
+      <textarea id="description" name="description" maxlength="500" rows="4"></textarea>
+    </div>
+    <div class="form-group">
+      <label for="destination">📍 Destination*</label>
+      <input type="text" id="destination" name="destination" maxlength="100" required>
+    </div>
+    <div class="form-group">
+      <label for="budget">💰 Budget (EUR)</label>
+      <input type="number" id="budget" step="0.01" name="budget">
+    </div>
+    <div class="form-group">
+      <label for="departure_locations">🚂 Departure locations (comma-separated)</label>
+      <input type="text" id="departure_locations" name="departure_locations" maxlength="200">
+    </div>
+    <div class="form-group">
+      <label for="activities">🎯 Activities (comma-separated)</label>
+      <input type="text" id="activities" name="activities" maxlength="200">
+    </div>
+    <div class="form-group">
+      <label for="start_date">📅 Start date*</label>
+      <input type="date" id="start_date" name="start_date" required>
+    </div>
+    <div class="form-group">
+      <label for="end_date">📅 End date*</label>
+      <input type="date" id="end_date" name="end_date" required>
+    </div>
+    <div class="form-group">
+      <label for="max_participants">👥 Max participants*</label>
+      <input type="number" id="max_participants" name="max_participants" required min="1">
+    </div>
+    <div class="form-group">
+      <button type="submit" class="btn btn-primary">✨ Create Trip</button>
+      <a href="{{ url_for('trip.list_all') }}" class="btn btn-secondary">Cancel</a>
+    </div>
+  </form>
+</div>
 {% endblock %}

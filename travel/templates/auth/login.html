@@ -1,11 +1,21 @@
 {% extends 'base.html' %}
 {% block content %}
-  <h2>Log in</h2>
+<div class="card" style="max-width: 400px; margin: 2rem auto;">
+  <h2>🔐 Log in</h2>
   <form action="{{ url_for('auth.login') }}" method="post">
-    <div><label>Email: <input type="email" name="email" required/></label></div>
-    <div><label>Password: <input type="password" name="password" required/></label></div>
-    <div><input type="submit" value="Log in"/></div>
+    <div class="form-group">
+      <label for="email">📧 Email:</label>
+      <input type="email" id="email" name="email" required/>
+    </div>
+    <div class="form-group">
+      <label for="password">🔑 Password:</label>
+      <input type="password" id="password" name="password" required/>
+    </div>
+    <div class="form-group">
+      <button type="submit" class="btn btn-primary" style="width: 100%;">✅ Log in</button>
+    </div>
   </form>
-  <p>New here? <a href="{{ url_for('auth.signup') }}">Create an account</a></p>
+  <p class="text-center">New here? <a href="{{ url_for('auth.signup') }}">✨ Create an account</a></p>
+</div>
 {% endblock %}
 

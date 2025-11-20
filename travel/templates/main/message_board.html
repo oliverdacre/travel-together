@@ -1,29 +1,44 @@
 {% extends "base.html" %}
 
 {% block content %}
-{% if messages %}
-    <h2>Messages:</h2>
-    <ul id="messageList">
-        {% for message in messages %}
-            <li data-message-id="{{ message.id }}">
-                <a href="{{ url_for('profile.profile', user_id=message.user.id) }}"><strong>{{ message.user.name }}</strong></a>: 
-                {{ message.content }} 
-                <em>({{ message.timestamp.strftime('%Y-%m-%d %H:%M') }})</em>
-            </li>
-        {% endfor %}
-    </ul>
-{% else %}
-    <h2>Messages:</h2>
-    <ul id="messageList">
-        <li id="noMessages">No messages yet. Be the first to post!</li>
-    </ul>
-{% endif %}
+<div class="message-board">
+  <div class="card">
+    <h1>💬 Message Board</h1>
+    <p><a href="{{ url_for('trip.detail', trip_id=trip_id) }}" class="btn btn-link">← Back to trip details</a></p>
+  </div>
 
-<form method="post" action="{{ url_for('main.post_message', trip_id=trip_id) }}" id="messageForm">
-    <label for="message">Leave a Message:</label><br>
-    <textarea id="message" name="message" rows="4" cols="50" required></textarea><br>
-    <input type="submit" value="Post Message">
-</form>
+  <div class="message-list" id="messageListContainer">
+    <ul id="messageList">
+      {% if messages %}
+        {% for message in messages %}
+          <li class="message-item" data-message-id="{{ message.id }}">
+            <div>
+              <a href="{{ url_for('profile.profile', user_id=message.user.id) }}" class="message-author">
+                👤 {{ message.user.name }}
+              </a>
+            </div>
+            <div class="message-content">{{ message.content }}</div>
+            <div class="message-timestamp">🕒 {{ message.timestamp.strftime('%Y-%m-%d %H:%M') }}</div>
+          </li>
+        {% endfor %}
+      {% else %}
+        <li id="noMessages" class="no-messages">💭 No messages yet. Be the first to post!</li>
+      {% endif %}
+    </ul>
+  </div>
+
+  <div class="message-form-card">
+    <form method="post" action="{{ url_for('main.post_message', trip_id=trip_id) }}" id="messageForm">
+      <div class="form-group">
+        <label for="message">✍️ Leave a Message:</label>
+        <textarea id="message" name="message" rows="4" required placeholder="Type your message here..."></textarea>
+      </div>
+      <div class="form-group">
+        <button type="submit" class="btn btn-primary">📤 Post Message</button>
+      </div>
+    </form>
+  </div>
+</div>
 
 <script>
     let lastMessageId = {{ messages[-1].id if messages else 0 }};
@@ -48,16 +63,27 @@
                     // Add new messages
                     $.each(newMessages, function(index, msg) {
                         const $li = $('<li>')
+                            .addClass('message-item')
                             .attr('data-message-id', msg.id);
                         
-                        // Escape HTML for security
-                        const $strong = $('<strong>').text(msg.user_name + ':');
-                        const $em = $('<em>').text(`(${msg.timestamp})`);
+                        // Create message structure
+                        const $author = $('<div>')
+                            .html($('<a>')
+                                .attr('href', `/profile/${msg.user_id}`)
+                                .addClass('message-author')
+                                .text('👤 ' + msg.user_name));
                         
-                        // Assemble the message
-                        $li.append($strong)
-                           .append(' ' + $('<div>').text(msg.content).html() + ' ')
-                           .append($em);
+                        const $content = $('<div>')
+                            .addClass('message-content')
+                            .text(msg.content);
+                        
+                        const $timestamp = $('<div>')
+                            .addClass('message-timestamp')
+                            .text('🕒 ' + msg.timestamp);
+                        
+                        $li.append($author)
+                           .append($content)
+                           .append($timestamp);
                         
                         $messageList.append($li);
                         
