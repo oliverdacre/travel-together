@@ -58,6 +58,7 @@
   </div>
 {% endif %}
 
+{% if is_participant %}
 <div class="card">
   <h2>💬 Discussion</h2>
   <p>
@@ -66,6 +67,7 @@
     </a>
   </p>
 </div>
+{% endif %}
 
 <p class="mt-md">
   <a href="{{ url_for('trip.list_all') }}" class="btn btn-link">← Back to all trip proposals</a>
