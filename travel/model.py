@@ -50,6 +50,7 @@ class TripProposal(db.Model):
     created_at: Mapped[datetime.datetime] = mapped_column(DateTime, default=func.now(), nullable=False)
     status: Mapped[ProposalStatus] = mapped_column(nullable=False, default=ProposalStatus.open)
     creator_id: Mapped[int] = mapped_column(ForeignKey("user.id"), nullable=False)
+    
     creator: Mapped["User"] = relationship("User", back_populates="created_trip_proposals")
     meetups: Mapped[List["Meetup"]] = relationship("Meetup", back_populates="proposal")
     participants: Mapped[List["TripProposalParticipation"]] = relationship(
@@ -57,11 +58,18 @@ class TripProposal(db.Model):
     )
     messages: Mapped[List["Message"]] = relationship("Message", back_populates="proposal")
 
+    @property
+    def editors(self):
+        return [p.user for p in self.participants if p.is_editor]
+
+
 class TripProposalParticipation(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("user.id"), nullable=False)
     proposal_id: Mapped[int] = mapped_column(ForeignKey("trip_proposal.id"), nullable=False)
     joined_at: Mapped[datetime.datetime] = mapped_column(DateTime, default=func.now(), nullable=False)
+
+    is_editor: Mapped[bool] = mapped_column(nullable=False, default=False)
 
     user = relationship("User", back_populates="participations")
     proposal = relationship("TripProposal", back_populates="participants")

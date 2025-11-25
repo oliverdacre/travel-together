@@ -76,7 +76,7 @@ def new_trip_post():
     db.session.commit()
 
     creator_participation = TripProposalParticipation(
-        user_id=current_user.id, proposal_id=new_proposal.id
+        user_id=current_user.id, proposal_id=new_proposal.id, is_editor=True
     )
     db.session.add(creator_participation)
     db.session.commit()
@@ -185,3 +185,46 @@ def my_trips():
     joined_trips = [p.proposal for p in joined_participations]
 
     return render_template("trip/my_trips.html", trips=joined_trips)
+
+
+@bp.route("/<int:trip_id>/edit", methods=["GET", "POST"])
+@flask_login.login_required
+def edit_trip(trip_id):
+    proposal = TripProposal.query.get_or_404(trip_id)
+
+    if flask_login.current_user not in proposal.editors:
+        flash("You do not have permission to edit this trip.")
+        return redirect(url_for("trip.detail", trip_id=trip_id))
+
+    return render_template("trip/edit_trip.html", proposal=proposal)
+
+    
+@bp.route("/<int:trip_id>/add_editor/<int:user_id>", methods=["POST"])
+@flask_login.login_required
+def add_editor(trip_id, user_id):
+    proposal = TripProposal.query.get_or_404(trip_id)
+
+    if flask_login.current_user not in proposal.editors:
+        flash("You are not allowed to manage editors.")
+        return redirect(url_for("trip.detail", trip_id=trip_id))
+
+    participation = db.session.execute(
+        db.select(TripProposalParticipation).where(
+            TripProposalParticipation.proposal_id == trip_id,
+            TripProposalParticipation.user_id == user_id,
+        )
+    ).scalar_one_or_none()
+
+    if not participation:
+        flash("This user is not a participant.")
+        return redirect(url_for("trip.detail", trip_id=trip_id))
+
+    participation.is_editor = True
+    db.session.commit()
+
+    flash("User is now an editor.")
+    return redirect(url_for("trip.detail", trip_id=trip_id))
+
+
+
+
