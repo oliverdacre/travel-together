@@ -81,6 +81,10 @@ def new_trip_post():
     db.session.add(creator_participation)
     db.session.commit()
 
+    if new_proposal.max_participants == 1:
+        new_proposal.status = ProposalStatus.closed_to_new_participants
+        db.session.commit()
+
     flash("Trip proposal created successfully!")
     return redirect(url_for("trip.detail", trip_id=new_proposal.id))
 
@@ -161,7 +165,8 @@ def join_trip(trip_id):
 @bp.route("/all")
 @flask_login.login_required
 def list_all():
-    trips = db.session.execute(db.select(TripProposal)).scalars().all()
+    query = db.select(TripProposal).where(TripProposal.status == ProposalStatus.open)
+    trips = db.session.execute(query).scalars().all()
     return render_template("trip/list.html", trips=trips)
 
 
