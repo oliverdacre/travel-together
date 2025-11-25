@@ -69,6 +69,46 @@
 </div>
 {% endif %}
 
+{% if current_user in proposal.editors %}
+<div class="card">
+
+  <h2>🛠️ Editor Tools</h2> 
+
+  <br>
+  
+  <div>
+    <a href="{{ url_for('trip.edit_trip', trip_id=proposal.id) }}" class ="btn btn-primary">
+      ✏️ Edit
+    </a>
+  </div>
+
+  <br>
+
+  <div>
+
+    <form action="{{ url_for('trip.add_editor', trip_id=proposal.id) }}" method="POST">
+
+      <div class="form-group">
+        <select name="user_id" required>
+          <option value="" disabled selected>Select participant…</option>
+          {% for participant in proposal.participants %}
+            {% if not participant.is_editor %}
+              <option value="{{ participant.user.id }}">
+                {{ participant.user.name }} ({{ participant.user.email }})
+              </option>
+            {% endif %}
+          {% endfor %}
+        </select>
+      </div>
+
+      <button class="btn btn-primary">➕ Add editor</button>
+    </form>
+  </div>
+
+</div>
+{% endif %}
+
+
 <p class="mt-md">
   <a href="{{ url_for('trip.list_all') }}" class="btn btn-link">← Back to all trip proposals</a>
 </p>

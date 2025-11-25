@@ -55,12 +55,13 @@ def new_trip_post():
     new_proposal = TripProposal(
         title=title,
         description=description if description else None,
+        description_final=False,
         destination=destination,
         destination_final=False,
         budget=budget_value,
         budget_final=False,
         departure_locations=departure_locations if departure_locations else None,
-        departure_location_final=False,
+        departure_locations_final=False,
         activities=activities if activities else None,
         activities_final=False,
         start_date=start_date_obj,
@@ -68,6 +69,7 @@ def new_trip_post():
         end_date=end_date_obj,
         end_date_final=False,
         max_participants=max_participants_int,
+        max_participants_final=False,
         status=ProposalStatus.open,
         creator_id=current_user.id,
     )
@@ -151,6 +153,8 @@ def join_trip(trip_id):
         )
     ).scalars().all()
     if len(current_count) >= proposal.max_participants:
+        proposal.status = ProposalStatus.closed_to_new_participants
+        db.session.commit()
         flash("This trip is already full.")
         return redirect(url_for("trip.detail", trip_id=trip_id))
 
@@ -187,7 +191,7 @@ def my_trips():
     return render_template("trip/my_trips.html", trips=joined_trips)
 
 
-@bp.route("/<int:trip_id>/edit", methods=["GET", "POST"])
+@bp.route("/<int:trip_id>/edit")
 @flask_login.login_required
 def edit_trip(trip_id):
     proposal = TripProposal.query.get_or_404(trip_id)
@@ -198,32 +202,98 @@ def edit_trip(trip_id):
 
     return render_template("trip/edit_trip.html", proposal=proposal)
 
-    
-@bp.route("/<int:trip_id>/add_editor/<int:user_id>", methods=["POST"])
+
+@bp.route("/<int:trip_id>/edit", methods=["POST"])
 @flask_login.login_required
-def add_editor(trip_id, user_id):
+def edit_trip_post(trip_id):
     proposal = TripProposal.query.get_or_404(trip_id)
 
     if flask_login.current_user not in proposal.editors:
-        flash("You are not allowed to manage editors.")
+        flash("You do not have permission to edit this trip.")
         return redirect(url_for("trip.detail", trip_id=trip_id))
 
-    participation = db.session.execute(
-        db.select(TripProposalParticipation).where(
-            TripProposalParticipation.proposal_id == trip_id,
-            TripProposalParticipation.user_id == user_id,
-        )
-    ).scalar_one_or_none()
+    description = request.form.get("description", "").strip()
+    destination = request.form.get("destination", "").strip()
+    budget = request.form.get("budget", "").strip()
+    departure_locations = request.form.get("departure_locations", "").strip()
+    activities = request.form.get("activities", "").strip()
+    start_date = request.form.get("start_date", "").strip()
+    end_date = request.form.get("end_date", "").strip()
+    max_participants = request.form.get("max_participants", "").strip()
+
+    if not destination or not start_date or not end_date or not max_participants:
+        flash("Please fill in all required fields (destination, dates, max participants).")
+        return redirect(url_for("trip.edit_trip", trip_id=trip_id))
+
+    try:
+        start_date_obj = datetime.strptime(start_date, "%Y-%m-%d")
+        end_date_obj = datetime.strptime(end_date, "%Y-%m-%d")
+    except ValueError:
+        flash("Invalid date format. Use YYYY-MM-DD.")
+        return redirect(url_for("trip.edit_trip", trip_id=trip_id))
+
+    if end_date_obj < start_date_obj:
+        flash("End date must be after start date.")
+        return redirect(url_for("trip.edit_trip", trip_id=trip_id))
+
+    try:
+        max_participants_int = int(max_participants)
+        if max_participants_int <= 0:
+            raise ValueError
+    except ValueError:
+        flash("Max participants must be a positive number.")
+        return redirect(url_for("trip.edit_trip", trip_id=trip_id))
+
+    budget_value = float(budget) if budget else None
+
+    proposal.description = description if description else None
+    proposal.destination = destination
+    proposal.budget = budget_value
+    proposal.departure_locations = departure_locations if departure_locations else None
+    proposal.activities = activities if activities else None
+    proposal.start_date = start_date_obj
+    proposal.end_date = end_date_obj
+    proposal.max_participants = max_participants_int
+
+    db.session.commit()
+    flash("Trip proposal updated successfully!")
+    return redirect(url_for("trip.detail", trip_id=trip_id))
+
+    
+@bp.route("/<int:trip_id>/add_editor", methods=["POST"])
+@flask_login.login_required
+def add_editor(trip_id):
+
+    proposal = TripProposal.query.get_or_404(trip_id)
+    current_user = flask_login.current_user
+
+    if current_user not in proposal.editors:
+        abort(403)
+
+    user_id = request.form.get("user_id")
+
+    if not user_id:
+        flash("No user selected.", "danger")
+        return redirect(url_for("trip.detail", trip_id=trip_id))
+
+    participation = TripProposalParticipation.query.filter_by(
+        proposal_id=trip_id,
+        user_id=user_id
+    ).first()
 
     if not participation:
-        flash("This user is not a participant.")
+        flash("The selected user is not a participant.", "danger")
+        return redirect(url_for("trip.detail", trip_id=trip_id))
+    if participation.is_editor:
+        flash("This user is already an editor.", "warning")
         return redirect(url_for("trip.detail", trip_id=trip_id))
 
     participation.is_editor = True
     db.session.commit()
 
-    flash("User is now an editor.")
+    flash("User has been granted editor permissions!", "success")
     return redirect(url_for("trip.detail", trip_id=trip_id))
+
 
 
 
