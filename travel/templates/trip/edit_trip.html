@@ -8,56 +8,56 @@
 <div class="card">
     <form method="post">
 
-        {% if not description_final %}
+        {% if not proposal.description_final %}
         <div class="form-group">
             <label for="description">📄 Description</label>
             <textarea id="description" name="description" maxlength="500" rows="4">{{ proposal.description if proposal.description else '' }}</textarea>
         </div>
         {% endif %}
 
-        {% if not destination_final %}
+        {% if not proposal.destination_final %}
         <div class="form-group">
             <label for="destination">📍 Destination*</label>
             <input type="text" id="destination" name="destination" maxlength="100" value="{{ proposal.destination }}" required>
         </div>
         {% endif %}
 
-        {% if not budget_final %}
+        {% if not proposal.budget_final %}
         <div class="form-group">
             <label for="budget">💰 Budget (EUR)</label>
             <input type="number" id="budget" step="0.01" name="budget" value="{{ proposal.budget }}">
         </div>
         {% endif %}
 
-        {% if not departure_locations_final %}
+        {% if not proposal.departure_locations_final %}
         <div class="form-group">
             <label for="departure_locations">🚂 Departure locations (comma-separated)</label>
             <input type="text" id="departure_locations" name="departure_locations" maxlength="200" value="{{ proposal.departure_locations if proposal.departure_locations else '' }}">
         </div>
         {% endif %}
 
-        {% if not activities_final %}
+        {% if not proposal.activities_final %}
         <div class="form-group">
             <label for="activities">🎯 Activities (comma-separated)</label>
             <input type="text" id="activities" name="activities" maxlength="200" value="{{ proposal.activities if proposal.activities else '' }}">
         </div>
         {% endif %}
 
-        {% if not start_date_final %}
+        {% if not proposal.start_date_final %}
         <div class="form-group">
             <label for="start_date">🗓️ Start Date*</label>
             <input type="date" id="start_date" name="start_date" value="{{ proposal.start_date.strftime('%Y-%m-%d') }}">
         </div>
         {% endif %}
 
-        {% if not end_date_final %}
+        {% if not proposal.end_date_final %}
         <div class="form-group">
             <label for="end_date">🗓️ End Date*</label>
             <input type="date" id="end_date" name="end_date" value="{{ proposal.end_date.strftime('%Y-%m-%d') }}">
         </div>
         {% endif %}
 
-        {% if not max_participants_final %}
+        {% if not proposal.max_participants_final %}
         <div class="form-group">
             <label for="max_participants">👥 Max Participants*</label>
             <input type="number" id="max_participants" name="max_participants" value="{{ proposal.max_participants }}" min="1">

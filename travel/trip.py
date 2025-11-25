@@ -294,7 +294,57 @@ def add_editor(trip_id):
     flash("User has been granted editor permissions!", "success")
     return redirect(url_for("trip.detail", trip_id=trip_id))
 
+@bp.route("/<int:trip_id>/finalize", methods=["POST"])
+@flask_login.login_required
+def finalize_proposal(trip_id):
+    proposal = TripProposal.query.get_or_404(trip_id)
+    current_user = flask_login.current_user
 
+    if current_user not in proposal.editors:
+        abort(403)
 
+    proposal.description_final = True
+    proposal.destination_final = True
+    proposal.budget_final = True
+    proposal.departure_locations_final = True
+    proposal.activities_final = True
+    proposal.start_date_final = True
+    proposal.end_date_final = True
+    proposal.max_participants_final = True
+    proposal.status = ProposalStatus.finalized
+
+    db.session.commit()
+
+    flash("Trip proposal has been finalized!", "success")
+    return redirect(url_for("trip.detail", trip_id=trip_id))
+
+@bp.route("/<int:trip_id>/close", methods=["POST"])
+@flask_login.login_required
+def close_proposal(trip_id):
+    proposal = TripProposal.query.get_or_404(trip_id)
+    current_user = flask_login.current_user
+
+    if current_user not in proposal.editors:
+        abort(403)
+
+    proposal.status = ProposalStatus.closed_to_new_participants
+    db.session.commit()
+
+    flash("Trip proposal has been closed to new participants!", "success")
+    return redirect(url_for("trip.detail", trip_id=trip_id))
+
+@bp.route("/<int:trip_id>/cancel", methods=["POST"])
+@flask_login.login_required
+def cancel_proposal(trip_id):
+    proposal = TripProposal.query.get_or_404(trip_id)
+    current_user = flask_login.current_user
+    if current_user not in proposal.editors:
+        abort(403)
+
+    proposal.status = ProposalStatus.cancelled
+    db.session.commit()
+
+    flash("Trip proposal has been cancelled!", "success")
+    return redirect(url_for("trip.detail", trip_id=trip_id))
 
 

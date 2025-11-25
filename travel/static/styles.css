@@ -217,6 +217,24 @@ button:focus,
   outline: none;
 }
 
+.btn-success {
+  background: var(--success-mint);
+  color: white;
+}
+
+.btn-success:hover {
+  background: #45b8ad;
+  color: white;
+  text-decoration: none;
+}
+
+.btn-success:active,
+.btn-success:focus {
+  background: #45b8ad;
+  color: white;
+  outline: none;
+}
+
 .btn-link {
   background: none;
   color: var(--accent-blue-gray);
