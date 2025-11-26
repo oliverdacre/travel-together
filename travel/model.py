@@ -53,6 +53,7 @@ class TripProposal(db.Model):
     created_at: Mapped[datetime.datetime] = mapped_column(DateTime, default=func.now(), nullable=False)
     status: Mapped[ProposalStatus] = mapped_column(nullable=False, default=ProposalStatus.open)
     creator_id: Mapped[int] = mapped_column(ForeignKey("user.id"), nullable=False)
+    images: Mapped[List["Image"]] = relationship("Image", back_populates="proposal")
     
     creator: Mapped["User"] = relationship("User", back_populates="created_trip_proposals")
     meetups: Mapped[List["Meetup"]] = relationship("Meetup", back_populates="proposal")
@@ -88,9 +89,20 @@ class Meetup(db.Model):
 class Message(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)
     content: Mapped[str] = mapped_column(String(1000), nullable=False)
+    images: Mapped[List["Image"]] = relationship("Image", back_populates="message")
     timestamp: Mapped[datetime.datetime] = mapped_column(DateTime, default=func.now(), nullable=False)
     user_id: Mapped[int] = mapped_column(ForeignKey("user.id"), nullable=False)
     proposal_id: Mapped[int] = mapped_column(ForeignKey("trip_proposal.id"), nullable=False)
 
     user = relationship("User", back_populates="messages")
     proposal = relationship("TripProposal", back_populates="messages")
+
+
+class Image(db.Model):
+    id: Mapped[int] = mapped_column(primary_key=True)
+    file_path: Mapped[str] = mapped_column(String(500), nullable=False)
+    message_id: Mapped[int] = mapped_column(ForeignKey("message.id"), nullable=False)
+    proposal_id: Mapped[int] = mapped_column(ForeignKey("trip_proposal.id"), nullable=False)
+
+    message = relationship("Message", back_populates="images")
+    proposal = relationship("TripProposal", back_populates="images")

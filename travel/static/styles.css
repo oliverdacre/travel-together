@@ -492,6 +492,34 @@ hr {
   line-height: 1.5;
 }
 
+.message-images {
+  margin-top: var(--spacing-sm);
+}
+
+.message-image {
+  max-width: 100%;
+  border-radius: var(--radius-sm);
+  margin-right: var(--spacing-sm);
+  margin-bottom: var(--spacing-sm);
+  box-shadow: var(--shadow-sm);
+  
+}
+
+input::file-selector-button {
+  background: var(--primary-teal);
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background-color 0.2s;
+  box-shadow: var(--shadow-sm);
+}
+
+input::file-selector-button:hover {
+  background: var(--primary-teal-dark);
+}
+
 .message-timestamp {
   font-size: 0.85rem;
   color: var(--text-muted);

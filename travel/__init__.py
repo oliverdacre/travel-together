@@ -13,6 +13,9 @@ def create_app():
     app = Flask(__name__)
     app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "dev-secret-key")
 
+    app.config['UPLOAD_FOLDER'] = os.path.join(app.instance_path, 'uploads')
+    os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
+
     # >>> Choose ONE URI — lab MariaDB or local SQLite <<<
     # app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+pymysql://26_webapp_XX:YYYYYYYYY@mysql.lab.it.uc3m.es/26_webapp_XXa"
     app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///data.db"

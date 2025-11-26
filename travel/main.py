@@ -1,7 +1,9 @@
-from flask import Blueprint, render_template, redirect, url_for, request, flash, abort, jsonify
+from flask import Blueprint, render_template, redirect, url_for, request, flash, abort, jsonify, current_app, send_from_directory
 import flask_login
 from . import db
-from .model import User, Message, TripProposal, TripProposalParticipation
+from .model import User, Message, TripProposal, TripProposalParticipation, Image
+import os
+from werkzeug.utils import secure_filename
 
 bp = Blueprint("main", __name__)
 
@@ -38,6 +40,8 @@ def message_board(trip_id):
 @flask_login.login_required
 def post_message(trip_id):
     message = request.form.get("message")
+    images = request.files.getlist("images")
+    
     # Ensure the trip exists
     proposal = db.session.get(TripProposal, trip_id)
     if not proposal:
@@ -62,6 +66,28 @@ def post_message(trip_id):
 
     new_message = Message(content=message, user_id=current_user.id, proposal_id=trip_id)
     db.session.add(new_message)
+    db.session.flush()  # Get the message ID without committing
+
+    # Process images
+    if images:
+        for image in images:
+            if image.filename:  # Check if a file was actually uploaded
+                # Get file extension from original filename
+                original_filename = secure_filename(image.filename)
+                file_ext = os.path.splitext(original_filename)[1]
+                
+                # Create Image record to get the ID
+                new_image = Image(file_path='', message_id=new_message.id, proposal_id=trip_id)
+                db.session.add(new_image)
+                db.session.flush()  # Get the image ID without committing
+                
+                # Use the image ID as filename
+                filename = f"{new_image.id}{file_ext}"
+                new_image.file_path = filename
+                
+                # Save the file with the ID as filename
+                image.save(os.path.join(current_app.config['UPLOAD_FOLDER'], filename))
+
     db.session.commit()
     return redirect(url_for("main.message_board", trip_id=trip_id))
 
@@ -97,6 +123,7 @@ def get_messages_since(trip_id, message_id):
         {
             'id': msg.id,
             'content': msg.content,
+            'images': [url_for('main.uploaded_file', filename=image.file_path) for image in msg.images],
             'user_name': msg.user.name,
             'user_id': msg.user.id,
             'timestamp': msg.timestamp.strftime('%Y-%m-%d %H:%M:%S')
@@ -105,3 +132,7 @@ def get_messages_since(trip_id, message_id):
     ]
     
     return jsonify(messages_data)
+
+@bp.route('/uploads/<filename>')
+def uploaded_file(filename):
+    return send_from_directory(current_app.config['UPLOAD_FOLDER'], filename)
