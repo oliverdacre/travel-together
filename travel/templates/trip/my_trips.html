@@ -11,6 +11,18 @@
       <div class="trip-meta">
         <span>📍 {{ trip.destination }}</span>
         <span>📅 {{ trip.start_date.strftime('%Y-%m-%d') }} → {{ trip.end_date.strftime('%Y-%m-%d') }}</span>
+        <span>
+          {% if trip.status.name == 'open' %}
+            🟢 Open
+          {% elif trip.status.name == 'closed' %}
+            🟡 Closed
+          {% elif trip.status.name == 'finalized' %}
+            🔵 Finalized
+          {% elif trip.status.name == 'cancelled' %}
+            🔴 Cancelled
+          {% endif %}
+        </span>
+        <span>👥 {{ trip.participants|length }} / {{ trip.max_participants }}</span>
       </div>
       <a href="{{ url_for('trip.detail', trip_id=trip.id) }}" class="btn btn-primary">🔍 View Details</a>
     </div>
