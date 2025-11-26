@@ -12,56 +12,102 @@
         <div class="form-group">
             <label for="description">📄 Description</label>
             <textarea id="description" name="description" maxlength="500" rows="4">{{ proposal.description if proposal.description else '' }}</textarea>
+        
+            <label class="inline-checkbox">
+            <input type="checkbox" name="description_final" value="1">Mark as final</label>
         </div>
+        {% else %}
+        <p><strong>📄 Description:</strong> {{ proposal.description }} <em>(final)</em></p>
         {% endif %}
+
 
         {% if not proposal.destination_final %}
         <div class="form-group">
             <label for="destination">📍 Destination*</label>
             <input type="text" id="destination" name="destination" maxlength="100" value="{{ proposal.destination }}" required>
+
+            <label class="inline-checkbox">
+            <input type="checkbox" name="destination_final" value="1">Mark as final</label>
         </div>
+        {% else %}
+        <p><strong>📍 Destination:</strong> {{ proposal.destination }} <em>(final)</em></p>
         {% endif %}
+
+
 
         {% if not proposal.budget_final %}
         <div class="form-group">
             <label for="budget">💰 Budget (EUR)</label>
             <input type="number" id="budget" step="0.01" name="budget" value="{{ proposal.budget }}">
+
+            
+            <label class="inline-checkbox">
+            <input type="checkbox" name="budget_final" value="1">Mark as final</label>
         </div>
+        {% else %}
+        <p><strong>💰 Budget:</strong> €{{ proposal.budget }} <em>(final)</em></p>
         {% endif %}
+
 
         {% if not proposal.departure_locations_final %}
         <div class="form-group">
             <label for="departure_locations">🚂 Departure locations (comma-separated)</label>
             <input type="text" id="departure_locations" name="departure_locations" maxlength="200" value="{{ proposal.departure_locations if proposal.departure_locations else '' }}">
+        
+            <label class="inline-checkbox">
+            <input type="checkbox" name="departure_locations_final" value="1">Mark as final</label>
         </div>
+        {% else %}
+        <p><strong>🚂 Departure locations:</strong> {{ proposal.departure_locations }}
         {% endif %}
+
 
         {% if not proposal.activities_final %}
         <div class="form-group">
             <label for="activities">🎯 Activities (comma-separated)</label>
             <input type="text" id="activities" name="activities" maxlength="200" value="{{ proposal.activities if proposal.activities else '' }}">
+            
+            <label class="inline-checkbox">
+            <input type="checkbox" name="activities_final" value="1">Mark as final</label>
         </div>
+        {% else %}
+        <p><strong>🎯 Activities:</strong> {{ proposal.activities }}
         {% endif %}
 
         {% if not proposal.start_date_final %}
         <div class="form-group">
             <label for="start_date">🗓️ Start Date*</label>
             <input type="date" id="start_date" name="start_date" value="{{ proposal.start_date.strftime('%Y-%m-%d') }}">
+            
+            <label class="inline-checkbox">
+            <input type="checkbox" name="start_date_final" value="1">Mark as final</label>
         </div>
+        {% else %}
+        <p><strong>🗓️ Start Date:</strong> {{ proposal.start_date.strftime('%Y-%m-%d') }} <em>(final)</em></p>
         {% endif %}
 
         {% if not proposal.end_date_final %}
         <div class="form-group">
             <label for="end_date">🗓️ End Date*</label>
             <input type="date" id="end_date" name="end_date" value="{{ proposal.end_date.strftime('%Y-%m-%d') }}">
+
+            <label class="inline-checkbox">
+            <input type="checkbox" name="end_date_final" value="1">Mark as final</label>
         </div>
+        {% else %}
+        <p><strong>🗓️ End Date:</strong> {{ proposal.end_date.strftime('%Y-%m-%d') }} <em>(final)</em></p>
         {% endif %}
 
         {% if not proposal.max_participants_final %}
         <div class="form-group">
             <label for="max_participants">👥 Max Participants*</label>
             <input type="number" id="max_participants" name="max_participants" value="{{ proposal.max_participants }}" min="1">
+
+            <label class="inline-checkbox">
+            <input type="checkbox" name="max_participants_final" value="1">Mark as final</label>
         </div>
+        {% else %}
+        <p><strong>👥 Max Participants:</strong> {{ proposal.max_participants }} <em>(final)</em></p>
         {% endif %}
 
         <div class="form-group">

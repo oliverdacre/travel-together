@@ -212,6 +212,7 @@ def edit_trip_post(trip_id):
         flash("You do not have permission to edit this trip.")
         return redirect(url_for("trip.detail", trip_id=trip_id))
 
+    # --- Get form values ---
     description = request.form.get("description", "").strip()
     destination = request.form.get("destination", "").strip()
     budget = request.form.get("budget", "").strip()
@@ -221,39 +222,102 @@ def edit_trip_post(trip_id):
     end_date = request.form.get("end_date", "").strip()
     max_participants = request.form.get("max_participants", "").strip()
 
-    if not destination or not start_date or not end_date or not max_participants:
+    # --- Get final flags from checkboxes ---
+    description_final_form = bool(request.form.get("description_final"))
+    destination_final_form = bool(request.form.get("destination_final"))
+    budget_final_form = bool(request.form.get("budget_final"))
+    departure_locations_final_form = bool(request.form.get("departure_locations_final"))
+    activities_final_form = bool(request.form.get("activities_final"))
+    start_date_final_form = bool(request.form.get("start_date_final"))
+    end_date_final_form = bool(request.form.get("end_date_final"))
+    max_participants_final_form = bool(request.form.get("max_participants_final"))
+
+    # --- Validate required fields ---
+    if (not (destination or proposal.destination_final)
+        or not (start_date or proposal.start_date_final)
+        or not (end_date or proposal.end_date_final)
+        or not (max_participants or proposal.max_participants_final)):
         flash("Please fill in all required fields (destination, dates, max participants).")
         return redirect(url_for("trip.edit_trip", trip_id=trip_id))
 
-    try:
-        start_date_obj = datetime.strptime(start_date, "%Y-%m-%d")
-        end_date_obj = datetime.strptime(end_date, "%Y-%m-%d")
-    except ValueError:
-        flash("Invalid date format. Use YYYY-MM-DD.")
-        return redirect(url_for("trip.edit_trip", trip_id=trip_id))
+    # --- Parse dates ---
+    if not proposal.start_date_final:
+        try:
+            start_date_obj = datetime.strptime(start_date, "%Y-%m-%d")
+        except ValueError:
+            flash("Invalid start date format. Use YYYY-MM-DD.")
+            return redirect(url_for("trip.edit_trip", trip_id=trip_id))
+    else:
+        start_date_obj = proposal.start_date
+
+    if not proposal.end_date_final:
+        try:
+            end_date_obj = datetime.strptime(end_date, "%Y-%m-%d")
+        except ValueError:
+            flash("Invalid end date format. Use YYYY-MM-DD.")
+            return redirect(url_for("trip.edit_trip", trip_id=trip_id))
+    else:
+        end_date_obj = proposal.end_date
 
     if end_date_obj < start_date_obj:
         flash("End date must be after start date.")
         return redirect(url_for("trip.edit_trip", trip_id=trip_id))
 
-    try:
-        max_participants_int = int(max_participants)
-        if max_participants_int <= 0:
-            raise ValueError
-    except ValueError:
-        flash("Max participants must be a positive number.")
+    # --- Parse max participants ---
+    if not proposal.max_participants_final:
+        try:
+            max_participants_int = int(max_participants)
+            if max_participants_int <= 0:
+                raise ValueError
+        except ValueError:
+            flash("Max participants must be a positive number.")
+            return redirect(url_for("trip.edit_trip", trip_id=trip_id))
+    else:
+        max_participants_int = proposal.max_participants
+
+    # --- Check participants count vs max ---
+    current_participants_count = len(proposal.participants)
+    if max_participants_int < current_participants_count:
+        flash(f"Max participants cannot be less than current participants ({current_participants_count}).")
         return redirect(url_for("trip.edit_trip", trip_id=trip_id))
 
-    budget_value = float(budget) if budget else None
+    # --- Parse budget ---
+    if not proposal.budget_final:
+        try:
+            budget_value = float(budget) if budget else None
+        except ValueError:
+            flash("Invalid budget value.")
+            return redirect(url_for("trip.edit_trip", trip_id=trip_id))
+    else:
+        budget_value = proposal.budget
 
-    proposal.description = description if description else None
-    proposal.destination = destination
-    proposal.budget = budget_value
-    proposal.departure_locations = departure_locations if departure_locations else None
-    proposal.activities = activities if activities else None
-    proposal.start_date = start_date_obj
-    proposal.end_date = end_date_obj
-    proposal.max_participants = max_participants_int
+    # --- Update fields if not final ---
+    if not proposal.description_final:
+        proposal.description = description if description else None
+    if not proposal.destination_final:
+        proposal.destination = destination
+    if not proposal.budget_final:
+        proposal.budget = budget_value
+    if not proposal.departure_locations_final:
+        proposal.departure_locations = departure_locations if departure_locations else None
+    if not proposal.activities_final:
+        proposal.activities = activities if activities else None
+    if not proposal.start_date_final:
+        proposal.start_date = start_date_obj
+    if not proposal.end_date_final:
+        proposal.end_date = end_date_obj
+    if not proposal.max_participants_final:
+        proposal.max_participants = max_participants_int
+
+    # --- Update final flags ---
+    proposal.description_final = proposal.description_final or description_final_form
+    proposal.destination_final = proposal.destination_final or destination_final_form
+    proposal.budget_final = proposal.budget_final or budget_final_form
+    proposal.departure_locations_final = proposal.departure_locations_final or departure_locations_final_form
+    proposal.activities_final = proposal.activities_final or activities_final_form
+    proposal.start_date_final = proposal.start_date_final or start_date_final_form
+    proposal.end_date_final = proposal.end_date_final or end_date_final_form
+    proposal.max_participants_final = proposal.max_participants_final or max_participants_final_form
 
     db.session.commit()
     flash("Trip proposal updated successfully!")
