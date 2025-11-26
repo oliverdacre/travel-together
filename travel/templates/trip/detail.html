@@ -69,6 +69,8 @@
 </div>
 {% endif %}
 
+{% include 'trip/gallery.html' %}
+
 {% if current_user in proposal.editors %}
   {% include 'trip/editor_tools.html' %}
 {% endif %}

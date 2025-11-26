@@ -546,6 +546,20 @@ input::file-selector-button:hover {
   font-style: italic;
 }
 
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--spacing-sm);
+}
+
+.gallery-image {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-sm);
+}
+
 @media (max-width: 768px) {
   .container,
   .content-wrapper {

@@ -1,0 +1,19 @@
+<div class="card">
+
+  <h2>🖼️ Gallery</h2> 
+  
+  <div>
+    {% if proposal.images %}
+      <div class="gallery-grid">
+        {% for image in proposal.images %}
+            <a href="{{ url_for('main.uploaded_file', filename=image.file_path) }}" target="_blank">
+              <img src="{{ url_for('main.uploaded_file', filename=image.file_path) }}" alt="Trip image" class="gallery-image">
+            </a>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="text-muted">No images available for this trip.</p>
+    {% endif %}
+  </div>
+
+</div>
