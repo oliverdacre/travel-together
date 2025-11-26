@@ -1,0 +1,65 @@
+<div class="card">
+
+  <h2>🛠️ Editor Tools</h2> 
+  {% if proposal.status.name in ['open', 'closed'] %}
+  <br>
+  <div>
+    <a href="{{ url_for('trip.edit_trip', trip_id=proposal.id) }}" class ="btn btn-primary">
+      ✏️ Edit
+    </a>
+  </div>
+  
+  <br>
+
+  <div>
+
+    <form action="{{ url_for('trip.add_editor', trip_id=proposal.id) }}" method="POST">
+
+      <div class="form-group">
+        <select name="user_id" required>
+          <option value="" disabled selected>Select participant…</option>
+          {% for participant in proposal.participants %}
+            {% if not participant.is_editor %}
+              <option value="{{ participant.user.id }}">
+                {{ participant.user.name }} ({{ participant.user.email }})
+              </option>
+            {% endif %}
+          {% endfor %}
+        </select>
+      </div>
+
+      <button class="btn btn-primary">➕ Add editor</button>
+    </form>
+  </div>
+  
+  <br>
+  {% endif %}
+  
+  <div style="display: flex; gap: 10px;">
+    {% if proposal.status.name in ['open', 'closed'] %}
+    <form action="{{ url_for('trip.finalize_proposal', trip_id=proposal.id) }}" method="POST">
+      <button class="btn btn-success">✅ Finalize</button>
+    </form>
+    {% endif %}
+
+    {% if proposal.status.name == 'open' %}
+    <form action="{{ url_for('trip.close_proposal', trip_id=proposal.id) }}" method="POST">
+      <button class="btn btn-secondary">📍 Close</button>
+    </form>
+    {% endif %}
+
+    {% if proposal.status.name != 'cancelled' %}
+    <form action="{{ url_for('trip.cancel_proposal', trip_id=proposal.id) }}" method="POST">
+      <button class="btn btn-secondary">❌ Cancel</button>
+    </form>
+    {% endif %}
+
+    {% if proposal.status.name != 'open' %}
+    <form action="{{ url_for('trip.reopen_proposal', trip_id=proposal.id) }}" method="POST">
+      <button class="btn btn-secondary">♻️ Reopen</button>
+    </form>
+    {% endif %}
+
+  </div>
+
+</div>

@@ -327,7 +327,7 @@ def close_proposal(trip_id):
     if current_user not in proposal.editors:
         abort(403)
 
-    proposal.status = ProposalStatus.closed_to_new_participants
+    proposal.status = ProposalStatus.closed
     db.session.commit()
 
     flash("Trip proposal has been closed to new participants!", "success")
@@ -345,6 +345,29 @@ def cancel_proposal(trip_id):
     db.session.commit()
 
     flash("Trip proposal has been cancelled!", "success")
+    return redirect(url_for("trip.detail", trip_id=trip_id))
+
+@bp.route("/<int:trip_id>/reopen", methods=["POST"])
+@flask_login.login_required
+def reopen_proposal(trip_id):
+    proposal = TripProposal.query.get_or_404(trip_id)
+    current_user = flask_login.current_user
+
+    if current_user not in proposal.editors:
+        abort(403)
+
+    proposal.status = ProposalStatus.open
+    proposal.description_final = False
+    proposal.destination_final = False
+    proposal.budget_final = False
+    proposal.departure_locations_final = False
+    proposal.activities_final = False
+    proposal.start_date_final = False
+    proposal.end_date_final = False
+    proposal.max_participants_final = False
+    db.session.commit()
+
+    flash("Trip proposal has been reopened!", "success")
     return redirect(url_for("trip.detail", trip_id=trip_id))
 
 
