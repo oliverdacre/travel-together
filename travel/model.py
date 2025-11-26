@@ -22,6 +22,7 @@ class User(flask_login.UserMixin, db.Model):
     gender: Mapped[Optional[str]] = mapped_column(String(10), nullable=True)
     age: Mapped[Optional[int]] = mapped_column(nullable=True)
     password_hash: Mapped[str] = mapped_column(String(128), nullable=False)
+    salt: Mapped[Optional[str]] = mapped_column(String(32), nullable=True)
     description: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
 
     created_trip_proposals: Mapped[List["TripProposal"]] = relationship("TripProposal", back_populates="creator")
