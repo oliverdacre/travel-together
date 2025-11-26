@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from werkzeug.security import generate_password_hash, check_password_hash
 import flask_login
+import secrets
 
 from . import db
 from . import model
@@ -28,8 +29,11 @@ def signup_post():
         flash("Sorry, the email you provided is already registered")
         return redirect(url_for("auth.signup"))
 
-    password_hash = generate_password_hash(password, method='pbkdf2:sha256')
-    new_user = model.User(email=email, name=username, password_hash=password_hash)
+    # Generate a cryptographically secure salt
+    salt = secrets.token_hex(16)
+    # Hash the password with the salt
+    password_hash = generate_password_hash(password + salt, method='pbkdf2:sha256')
+    new_user = model.User(email=email, name=username, password_hash=password_hash, salt=salt)
     db.session.add(new_user)
     db.session.commit()
 
@@ -48,7 +52,7 @@ def login_post():
     query = db.select(model.User).where(model.User.email == email)
     user = db.session.execute(query).scalar_one_or_none()
 
-    if user and check_password_hash(user.password_hash, password):
+    if user and user.salt and check_password_hash(user.password_hash, password + user.salt):
         flask_login.login_user(user)
         return redirect(url_for("main.index"))
     else:
