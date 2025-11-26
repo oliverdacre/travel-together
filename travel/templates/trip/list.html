@@ -9,6 +9,7 @@
     <div class="trip-meta">
       <span>📍 {{ t.destination }}</span>
       <span>📅 {{ t.start_date.strftime('%Y-%m-%d') }} → {{ t.end_date.strftime('%Y-%m-%d') }}</span>
+      <span>👥 {{ t.participants|length }} / {{ t.max_participants }}</span>
     </div>
     <a href="{{ url_for('trip.detail', trip_id=t.id) }}" class="btn btn-primary">🔍 View Details</a>
   </div>
