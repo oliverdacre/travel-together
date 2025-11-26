@@ -10,10 +10,10 @@ from . import db
 import enum
 
 class ProposalStatus(enum.Enum):
-    open = 1
-    closed_to_new_participants = 2
-    finalized = 3
-    cancelled = 4
+    open = "Open"
+    closed = "Closed to New Participants"
+    finalized = "Finalized"
+    cancelled = "Cancelled"
 
 class User(flask_login.UserMixin, db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)
