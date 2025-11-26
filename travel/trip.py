@@ -55,21 +55,13 @@ def new_trip_post():
     new_proposal = TripProposal(
         title=title,
         description=description if description else None,
-        description_final=False,
         destination=destination,
-        destination_final=False,
         budget=budget_value,
-        budget_final=False,
         departure_locations=departure_locations if departure_locations else None,
-        departure_locations_final=False,
         activities=activities if activities else None,
-        activities_final=False,
         start_date=start_date_obj,
-        start_date_final=False,
         end_date=end_date_obj,
-        end_date_final=False,
         max_participants=max_participants_int,
-        max_participants_final=False,
         status=ProposalStatus.open,
         creator_id=current_user.id,
     )
@@ -84,7 +76,7 @@ def new_trip_post():
     db.session.commit()
 
     if new_proposal.max_participants == 1:
-        new_proposal.status = ProposalStatus.closed_to_new_participants
+        new_proposal.status = ProposalStatus.closed
         db.session.commit()
 
     flash("Trip proposal created successfully!")
@@ -107,7 +99,7 @@ def detail(trip_id):
         )
     ).scalar_one_or_none()
 
-    is_participant = participation is not None or proposal.creator_id == current_user.id
+    is_participant = participation is not None
 
     participants = []
     if is_participant:
@@ -134,6 +126,10 @@ def join_trip(trip_id):
     if not proposal:
         abort(404)
 
+    if proposal.status != ProposalStatus.open:
+        flash("This trip is not open for new participants.")
+        return redirect(url_for("trip.detail", trip_id=trip_id))  
+
     user = flask_login.current_user
 
     already_joined = db.session.execute(
@@ -153,7 +149,7 @@ def join_trip(trip_id):
         )
     ).scalars().all()
     if len(current_count) >= proposal.max_participants:
-        proposal.status = ProposalStatus.closed_to_new_participants
+        proposal.status = ProposalStatus.closed
         db.session.commit()
         flash("This trip is already full.")
         return redirect(url_for("trip.detail", trip_id=trip_id))
@@ -161,6 +157,10 @@ def join_trip(trip_id):
     participation = TripProposalParticipation(user_id=user.id, proposal_id=trip_id)
     db.session.add(participation)
     db.session.commit()
+
+    if len(current_count) + 1 >= proposal.max_participants:
+        proposal.status = ProposalStatus.closed
+        db.session.commit()
 
     flash("You have successfully joined the trip!")
     return redirect(url_for("trip.detail", trip_id=trip_id))
@@ -333,6 +333,10 @@ def add_editor(trip_id):
 
     if current_user not in proposal.editors:
         abort(403)
+
+    if proposal.status not in [ProposalStatus.open, ProposalStatus.closed]:
+        flash("Cannot modify editors for a trip that is finalized or cancelled.", "danger")
+        return redirect(url_for("trip.detail", trip_id=trip_id))
 
     user_id = request.form.get("user_id")
 
