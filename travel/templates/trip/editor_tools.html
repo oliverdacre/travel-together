@@ -35,7 +35,7 @@
   <br>
   {% endif %}
   
-  <div style="display: flex; gap: 10px;">
+  <div class="flex-between">
     {% if proposal.status.name in ['open', 'closed'] %}
     <form action="{{ url_for('trip.finalize_proposal', trip_id=proposal.id) }}" method="POST">
       <button class="btn btn-success">✅ Finalize</button>

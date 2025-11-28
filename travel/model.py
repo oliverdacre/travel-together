@@ -31,6 +31,19 @@ class User(flask_login.UserMixin, db.Model):
         "TripProposalParticipation", back_populates="user"
     )
 
+    received_ratings: Mapped[List["UserRating"]] = relationship(
+        "UserRating", foreign_keys="[UserRating.ratee_id]", back_populates="ratee"
+    )
+    given_ratings: Mapped[List["UserRating"]] = relationship(
+        "UserRating", foreign_keys="[UserRating.rater_id]", back_populates="rater"
+    )
+
+    @property
+    def average_rating(self) -> Optional[float]:
+        if not self.received_ratings:
+            return None
+        return sum(r.rating for r in self.received_ratings) / len(self.received_ratings)
+
 class TripProposal(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)
     title: Mapped[str] = mapped_column(String(100), nullable=False)
@@ -65,6 +78,10 @@ class TripProposal(db.Model):
     @property
     def editors(self):
         return [p.user for p in self.participants if p.is_editor]
+    
+    ratings: Mapped[List["UserRating"]] = relationship(
+        "UserRating", back_populates="trip"
+    )
 
 
 class TripProposalParticipation(db.Model):
@@ -106,3 +123,19 @@ class Image(db.Model):
 
     message = relationship("Message", back_populates="images")
     proposal = relationship("TripProposal", back_populates="images")
+
+
+class UserRating(db.Model):
+    id: Mapped[int] = mapped_column(primary_key=True)
+
+    trip_id: Mapped[int] = mapped_column(ForeignKey("trip_proposal.id"), nullable=False)
+    rater_id: Mapped[int] = mapped_column(ForeignKey("user.id"), nullable=False)
+    ratee_id: Mapped[int] = mapped_column(ForeignKey("user.id"), nullable=False)
+
+    rating: Mapped[int] = mapped_column(nullable=False)
+
+    created_at: Mapped[datetime.datetime] = mapped_column(DateTime, default=func.now(), nullable=False)
+
+    trip = relationship("TripProposal", back_populates="ratings")
+    rater = relationship("User", foreign_keys=[rater_id], back_populates="given_ratings")
+    ratee = relationship("User", foreign_keys=[ratee_id], back_populates="received_ratings")

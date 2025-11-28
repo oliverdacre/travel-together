@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, redirect, url_for, request, flash,
 import flask_login
 from datetime import datetime
 from . import db
-from .model import TripProposal, ProposalStatus, TripProposalParticipation
+from .model import TripProposal, ProposalStatus, TripProposalParticipation, UserRating
 
 bp = Blueprint("trip", __name__, url_prefix="/trip")
 
@@ -116,6 +116,7 @@ def detail(trip_id):
         proposal=proposal,
         participants=participants,
         is_participant=is_participant,
+        current_time=datetime.utcnow(),
     )
 
 
@@ -436,6 +437,93 @@ def reopen_proposal(trip_id):
     db.session.commit()
 
     flash("Trip proposal has been reopened!", "success")
+    return redirect(url_for("trip.detail", trip_id=trip_id))
+
+
+@bp.route("/<int:trip_id>/rate", methods=["GET"])
+@flask_login.login_required
+def rate_users(trip_id):
+    proposal = TripProposal.query.get_or_404(trip_id)
+    current_user = flask_login.current_user
+
+    if current_user not in [p.user for p in proposal.participants]:
+        flash("You must be a participant to rate users.")
+        return redirect(url_for("trip.detail", trip_id=trip_id))
+
+    now = datetime.utcnow()
+    if proposal.end_date > now:
+        flash("You can only rate participants after the trip has ended.")
+        return redirect(url_for("trip.detail", trip_id=trip_id))
+
+    rateable_users = [
+        p.user
+        for p in proposal.participants
+        if p.user.id != flask_login.current_user.id
+    ]
+
+    ratings = {
+    r.ratee_id: r.rating
+    for r in UserRating.query.filter_by(trip_id=trip_id, rater_id=current_user.id).all()
+}
+
+    return render_template(
+        "trip/rating.html",
+        proposal=proposal,
+        users=rateable_users,
+        ratings=ratings
+    )
+
+
+@bp.route("/<int:trip_id>/rate", methods=["POST"])
+@flask_login.login_required
+def submit_ratings(trip_id):
+    proposal = TripProposal.query.get_or_404(trip_id)
+
+    current_user = flask_login.current_user
+
+    participant_ids = [p.user.id for p in proposal.participants]
+    if current_user.id not in participant_ids:
+        flash("You must be a participant to rate others.")
+        return redirect(url_for("trip.detail", trip_id=trip_id))
+
+    now = datetime.utcnow()
+    if proposal.end_date > now:
+        flash("You can rate participants only after the trip has ended.")
+        return redirect(url_for("trip.detail", trip_id=trip_id))
+
+    for key, value in request.form.items():
+        if not key.startswith("rating_"):
+            continue
+
+        ratee_id = int(key.replace("rating_", ""))
+        rating_value = int(value)
+
+        if ratee_id == current_user.id:
+            continue
+
+        if rating_value < 1 or rating_value > 5:
+            flash("Invalid rating value.")
+            return redirect(url_for("trip.rate_users", trip_id=trip_id))
+
+        existing = UserRating.query.filter_by(
+            trip_id=trip_id,
+            rater_id=current_user.id,
+            ratee_id=ratee_id
+        ).first()
+
+        if existing:
+            existing.rating = rating_value
+        else:
+            new_rating = UserRating(
+                trip_id=trip_id,
+                rater_id=current_user.id,
+                ratee_id=ratee_id,
+                rating=rating_value
+            )
+            db.session.add(new_rating)
+
+    db.session.commit()
+    flash("Your ratings have been submitted!")
     return redirect(url_for("trip.detail", trip_id=trip_id))
 
 
