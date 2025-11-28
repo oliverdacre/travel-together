@@ -167,6 +167,67 @@ def join_trip(trip_id):
     return redirect(url_for("trip.detail", trip_id=trip_id))
 
 
+@bp.route("/<int:trip_id>/leave", methods=["GET", "POST"])
+@flask_login.login_required
+def leave_trip(trip_id):
+    proposal = db.session.get(TripProposal, trip_id)
+    if not proposal:
+        abort(404)
+
+    user = flask_login.current_user
+
+    participation = db.session.scalar(
+        db.select(TripProposalParticipation).where(
+            TripProposalParticipation.user_id == user.id,
+            TripProposalParticipation.proposal_id == trip_id
+        )
+    )
+
+    if not participation:
+        flash("You are not a participant of this trip.")
+        return redirect(url_for("trip.detail", trip_id=trip_id))
+
+    participants = db.session.scalars(
+        db.select(TripProposalParticipation).where(
+            TripProposalParticipation.proposal_id == trip_id
+        )
+    ).all()
+
+    current_count = len(participants)
+
+    # Cannot leave a finalized trip
+    if proposal.status == ProposalStatus.finalized:
+        flash("You cannot leave a finalized trip.")
+        return redirect(url_for("trip.detail", trip_id=trip_id))
+
+    # Only editor cannot leave open or closed trip
+    if proposal.status in [ProposalStatus.open, ProposalStatus.closed]:
+        if participation.is_editor and len(proposal.editors) == 1 and current_count > 1:
+            flash("You are the only editor. Please assign another editor or before leaving.")
+            return redirect(url_for("trip.detail", trip_id=trip_id))
+
+    # Delete participation
+    db.session.delete(participation)
+    new_count = current_count - 1
+
+    # Last person leaves -> delete trip
+    if new_count == 0:
+        proposal.status = ProposalStatus.deleted
+        db.session.commit()
+        flash("You left the trip. The trip has been deleted because no participants remain.")
+        return redirect(url_for("trip.list_all"))
+
+    # If trip was closed and now falls below max capacity -> reopen
+    if proposal.status == ProposalStatus.closed and new_count < proposal.max_participants:
+        proposal.status = ProposalStatus.open
+
+    db.session.commit()
+
+    flash("You have successfully left the trip.")
+    return redirect(url_for("trip.detail", trip_id=trip_id))
+
+
+
 @bp.route("/all")
 @flask_login.login_required
 def list_all():

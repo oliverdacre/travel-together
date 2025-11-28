@@ -98,7 +98,10 @@
   {% include 'trip/editor_tools.html' %}
 {% endif %}
 
-<p class="mt-md">
+<div class="mt-md flex-between">
   <a href="{{ url_for('trip.list_all') }}" class="btn btn-link">← Back to all trip proposals</a>
-</p>
+  {% if is_participant %}
+  <a href="{{ url_for('trip.leave_trip', trip_id=proposal.id) }}" class="btn btn-danger">🚪 Leave trip</a>
+  {% endif %}
+</div>
 {% endblock %}
