@@ -69,7 +69,30 @@
 </div>
 {% endif %}
 
+
+{% if is_participant %}
 {% include 'trip/gallery.html' %}
+{% endif %}
+
+
+{% if is_participant %}
+<div class="card">
+  <h2>⭐ Participant Ratings</h2>
+
+  {% if proposal.end_date < current_time %}
+      <p>
+        <a href="{{ url_for('trip.rate_users', trip_id=proposal.id) }}" class="btn btn-primary">
+          ⭐ Rate participants →
+        </a>
+      </p>
+  {% else %}
+      <p class="text-muted">
+        Ratings will be available after the trip ends on {{ proposal.end_date.strftime('%Y-%m-%d') }}.
+      </p>
+  {% endif %}
+</div>
+{% endif %}
+
 
 {% if current_user in proposal.editors %}
   {% include 'trip/editor_tools.html' %}
