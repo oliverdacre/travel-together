@@ -25,8 +25,9 @@
 
     <button type="submit" class="btn btn-primary">Submit all ratings</button>
 </form>
-
-
-
 </div>
+
+<p class="mt-md">
+  <a href="{{ url_for('trip.detail', trip_id=proposal.id) }}" class="btn btn-link">← Back to trip proposal details</a>
+</p>
 {% endblock %}
