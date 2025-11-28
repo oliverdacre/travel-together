@@ -6,25 +6,27 @@
 <div class="card">
   <h2>Rate participants for trip <em>{{ proposal.title }}</em></h2>
 
-{% for user in users %}
-    <form method="POST" action="{{ url_for('trip.submit_ratings', trip_id=proposal.id) }}">
-    <label>{{ user.name }}</label>
-    <div class="flex">
-    {% for i in range(1,6) %}
-        <label>
-            <input type="radio"
-                   name="rating_{{ user.id }}"
-                   value="{{ i }}">
-            {{ "⭐" * i }}
-        </label>
-    {% endfor %}
-    </div>
+<form method="POST" action="{{ url_for('trip.submit_ratings', trip_id=proposal.id) }}">
 
-    <br><br>
-    <button type="submit">Submit rating</button>
+    {% for user in users %}
+    <div>
+        <strong>{{ user.name }}</strong>
+
+        <div class="flex-between">
+            {% for i in range(1, 6) %}
+            <label class="flex-between">
+                <input type="radio" name="rating_{{ user.id }}" value="{{ i }}">
+                {{ "⭐" * i }}
+            </label>
+            {% endfor %}
+        </div>
+    </div>
+    {% endfor %}
+
+    <button type="submit" class="btn btn-primary">Submit all ratings</button>
 </form>
 
 
-{% endfor %}
+
 </div>
 {% endblock %}
