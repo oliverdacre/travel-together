@@ -48,13 +48,13 @@
     </form>
     {% endif %}
 
-    {% if proposal.status.name != 'cancelled' %}
+    {% if proposal.status.name in ['open', 'closed', 'finalized'] %}
     <form action="{{ url_for('trip.cancel_proposal', trip_id=proposal.id) }}" method="POST">
       <button class="btn btn-secondary">❌ Cancel</button>
     </form>
     {% endif %}
 
-    {% if proposal.status.name != 'open' %}
+    {% if proposal.status.name in ['closed', 'finalized', 'cancelled'] %}
     <form action="{{ url_for('trip.reopen_proposal', trip_id=proposal.id) }}" method="POST">
       <button class="btn btn-secondary">♻️ Reopen</button>
     </form>
