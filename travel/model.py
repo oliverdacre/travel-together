@@ -14,6 +14,7 @@ class ProposalStatus(enum.Enum):
     closed = "Closed to New Participants"
     finalized = "Finalized"
     cancelled = "Cancelled"
+    deleted = "Deleted"
 
 class User(flask_login.UserMixin, db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)
