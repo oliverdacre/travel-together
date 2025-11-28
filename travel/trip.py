@@ -444,8 +444,9 @@ def reopen_proposal(trip_id):
 @flask_login.login_required
 def rate_users(trip_id):
     proposal = TripProposal.query.get_or_404(trip_id)
+    current_user = flask_login.current_user
 
-    if flask_login.current_user not in [p.user for p in proposal.participants]:
+    if current_user not in [p.user for p in proposal.participants]:
         flash("You must be a participant to rate users.")
         return redirect(url_for("trip.detail", trip_id=trip_id))
 
@@ -460,10 +461,16 @@ def rate_users(trip_id):
         if p.user.id != flask_login.current_user.id
     ]
 
+    ratings = {
+    r.ratee_id: r.rating
+    for r in UserRating.query.filter_by(trip_id=trip_id, rater_id=current_user.id).all()
+}
+
     return render_template(
         "trip/rating.html",
         proposal=proposal,
-        users=rateable_users
+        users=rateable_users,
+        ratings=ratings
     )
 
 

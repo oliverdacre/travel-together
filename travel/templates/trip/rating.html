@@ -15,7 +15,7 @@
         <div class="flex-between">
             {% for i in range(1, 6) %}
             <label class="flex-between">
-                <input type="radio" name="rating_{{ user.id }}" value="{{ i }}">
+                <input type="radio" name="rating_{{ user.id }}" value="{{ i }}" {% if ratings.get(user.id) == i %}checked{% endif %}>
                 {{ "⭐" * i }}
             </label>
             {% endfor %}
