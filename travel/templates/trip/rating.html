@@ -5,41 +5,25 @@
 {% block content %}
 <div class="card">
   <h2>Rate participants for trip <em>{{ proposal.title }}</em></h2>
-  <p class="text-muted">👤 Created by <a href="{{ url_for('profile.profile', user_id=proposal.creator_id) }}">{{ proposal.creator.name }}</a></p>
 
 {% for user in users %}
-    <form method="POST" action="{{ url_for('trip.submit_ratings', trip_id=proposal.id, user_id=user.id) }}">
+    <form method="POST" action="{{ url_for('trip.submit_ratings', trip_id=proposal.id) }}">
     <label>{{ user.name }}</label>
-
-    <div style="display: flex; gap: 10px; margin: 5px 0;">
+    <div class="flex">
+    {% for i in range(1,6) %}
         <label>
-            <input type="radio" name="rating" value="1" required>
-            ⭐
+            <input type="radio"
+                   name="rating_{{ user.id }}"
+                   value="{{ i }}">
+            {{ "⭐" * i }}
         </label>
-
-        <label>
-            <input type="radio" name="rating" value="2">
-            ⭐⭐
-        </label>
-
-        <label>
-            <input type="radio" name="rating" value="3">
-            ⭐⭐⭐
-        </label>
-
-        <label>
-            <input type="radio" name="rating" value="4">
-            ⭐⭐⭐⭐
-        </label>
-
-        <label>
-            <input type="radio" name="rating" value="5">
-            ⭐⭐⭐⭐⭐
-        </label>
+    {% endfor %}
     </div>
 
+    <br><br>
     <button type="submit">Submit rating</button>
 </form>
+
 
 {% endfor %}
 </div>

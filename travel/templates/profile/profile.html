@@ -25,6 +25,22 @@
   {% endif %}
 </div>
 
+<div class="card">
+  <h2>🌟 Ratings</h2>
+  {% if user.received_ratings %}
+    <p><strong>Average Rating:</strong> {{ "%.2f"|format(user.average_rating) }} / 5 (based on {{ user.received_ratings|length }} ratings)</p>
+    <ul>
+      {% for rating in user.received_ratings %}
+        <li>
+          {{ "⭐" * rating.rating }} from <a href="{{ url_for('profile.profile', user_id=rating.rater.id) }}">{{ rating.rater.name }}</a> for trip <em>{{ rating.trip.title }}</em>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="text-muted"><em>No ratings received yet.</em></p>
+  {% endif %}
+</div>
+
 {% if current_user.id == user.id %}
   <div class="card">
     <a href="{{ url_for('profile.edit_profile') }}" class="btn btn-secondary">✏️ Edit your profile</a>
