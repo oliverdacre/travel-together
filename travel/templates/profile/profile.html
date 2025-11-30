@@ -2,7 +2,21 @@
 
 {% block content %}
 <div class="card">
-  <h1>👤 {{ user.name }}'s Profile</h1>
+  <div style="display: flex; align-items: center; gap: 20px;">
+    {% if user.profile_photo %}
+      <img src="{{ url_for('main.uploaded_file', filename=user.profile_photo) }}" alt="Profile photo" style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 3px solid #ddd;">
+    {% else %}
+      <div style="width: 120px; height: 120px; border-radius: 50%; background-color: #ddd; display: flex; align-items: center; justify-content: center; font-size: 48px; border: 3px solid #ccc;">
+        👤
+      </div>
+    {% endif %}
+    <div>
+      <h1 style="margin: 0;">{{ user.name }}</h1>
+      {% if user.location %}
+        <p style="margin: 5px 0; color: #666;">📍 {{ user.location }}</p>
+      {% endif %}
+    </div>
+  </div>
 </div>
 
 <div class="card">
@@ -17,11 +31,22 @@
 <div class="card">
   <h2>ℹ️ User Information</h2>
   <p><strong>📧 Email:</strong> {{ user.email }}</p>
-  {% if user.age %}
-    <p><strong>🎂 Age:</strong> {{ user.age }}</p>
+  {% if user.birthday %}
+    <p><strong>🎂 Birthday:</strong> {{ user.birthday.strftime('%B %d, %Y') }}</p>
+  {% endif %}
+  {% if user.calculated_age %}
+    <p><strong>🎂 Age:</strong> {{ user.calculated_age }} years old</p>
+  {% elif user.age %}
+    <p><strong>🎂 Age:</strong> {{ user.age }} years old</p>
   {% endif %}
   {% if user.gender %}
     <p><strong>⚧️ Gender:</strong> {{ user.gender }}</p>
+  {% endif %}
+  {% if user.location %}
+    <p><strong>📍 Location:</strong> {{ user.location }}</p>
+  {% endif %}
+  {% if user.phone %}
+    <p><strong>📞 Phone:</strong> {{ user.phone }}</p>
   {% endif %}
 </div>
 

@@ -4,11 +4,52 @@
 <div class="card">
   <h1>✏️ Edit Your Profile</h1>
 
-  <form action="{{ url_for('profile.edit_profile') }}" method="post">
+  <form action="{{ url_for('profile.edit_profile') }}" method="post" enctype="multipart/form-data">
+    <div class="form-group">
+      <label for="profile_photo">📷 Profile Photo:</label>
+      {% if current_user.profile_photo %}
+        <div style="margin-bottom: 10px;">
+          <img src="{{ url_for('main.uploaded_file', filename=current_user.profile_photo) }}" alt="Profile photo" style="max-width: 200px; max-height: 200px; border-radius: 50%; object-fit: cover;">
+          <p class="text-muted" style="font-size: 0.9em; margin-top: 5px;">Current profile photo</p>
+        </div>
+      {% endif %}
+      <input type="file" id="profile_photo" name="profile_photo" accept="image/*">
+      <small class="text-muted">Upload a new profile photo (JPG, PNG, etc.)</small>
+    </div>
+
+    <div class="form-group">
+      <label for="gender">⚧️ Gender:</label>
+      <select id="gender" name="gender">
+        <option value="">-- Select Gender --</option>
+        <option value="Male" {% if current_user.gender == 'Male' %}selected{% endif %}>Male</option>
+        <option value="Female" {% if current_user.gender == 'Female' %}selected{% endif %}>Female</option>
+        <option value="Non-binary" {% if current_user.gender == 'Non-binary' %}selected{% endif %}>Non-binary</option>
+        <option value="Other" {% if current_user.gender == 'Other' %}selected{% endif %}>Other</option>
+        <option value="Prefer not to say" {% if current_user.gender == 'Prefer not to say' %}selected{% endif %}>Prefer not to say</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="birthday">🎂 Birthday:</label>
+      <input type="date" id="birthday" name="birthday" value="{% if current_user.birthday %}{{ current_user.birthday.strftime('%Y-%m-%d') }}{% endif %}">
+      <small class="text-muted">Your age will be calculated automatically from your birthday</small>
+    </div>
+
+    <div class="form-group">
+      <label for="location">📍 Location:</label>
+      <input type="text" id="location" name="location" value="{{ current_user.location or '' }}" placeholder="e.g., New York, USA" maxlength="100">
+    </div>
+
+    <div class="form-group">
+      <label for="phone">📞 Phone Number:</label>
+      <input type="tel" id="phone" name="phone" value="{{ current_user.phone or '' }}" placeholder="e.g., +1 234 567 8900" maxlength="20">
+    </div>
+
     <div class="form-group">
       <label for="description">📝 Description (max 500 characters):</label>
       <textarea id="description" name="description" rows="5" maxlength="500">{{ current_user.description or '' }}</textarea>
     </div>
+
     <div class="form-group">
       <button type="submit" class="btn btn-primary">💾 Save Profile</button>
       <a href="{{ url_for('profile.profile', user_id=current_user.id) }}" class="btn btn-secondary">❌ Cancel</a>

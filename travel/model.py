@@ -20,8 +20,12 @@ class User(flask_login.UserMixin, db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)
     email: Mapped[str] = mapped_column(String(128), unique=True, nullable=False)
     name: Mapped[str] = mapped_column(String(50), nullable=False)
-    gender: Mapped[Optional[str]] = mapped_column(String(10), nullable=True)
+    gender: Mapped[Optional[str]] = mapped_column(String(20), nullable=True)
     age: Mapped[Optional[int]] = mapped_column(nullable=True)
+    birthday: Mapped[Optional[datetime.datetime]] = mapped_column(DateTime, nullable=True)
+    profile_photo: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
+    location: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
+    phone: Mapped[Optional[str]] = mapped_column(String(20), nullable=True)
     password_hash: Mapped[str] = mapped_column(String(128), nullable=False)
     salt: Mapped[Optional[str]] = mapped_column(String(32), nullable=True)
     description: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
@@ -44,6 +48,19 @@ class User(flask_login.UserMixin, db.Model):
         if not self.received_ratings:
             return None
         return sum(r.rating for r in self.received_ratings) / len(self.received_ratings)
+    
+    @property
+    def calculated_age(self) -> Optional[int]:
+        """Calculate age from birthday if available, otherwise return stored age"""
+        if self.birthday:
+            today = datetime.date.today()
+            if isinstance(self.birthday, datetime.datetime):
+                birth_date = self.birthday.date()
+            else:
+                birth_date = self.birthday
+            age = today.year - birth_date.year - ((today.month, today.day) < (birth_date.month, birth_date.day))
+            return age
+        return self.age
 
 class TripProposal(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)
