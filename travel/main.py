@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, redirect, url_for, request, flash, abort, jsonify, current_app, send_from_directory
 import flask_login
 from . import db
-from .model import User, Message, TripProposal, TripProposalParticipation, Image
+from .model import ProposalStatus, User, Message, TripProposal, TripProposalParticipation, Image
 import os
 from werkzeug.utils import secure_filename
 
@@ -31,10 +31,13 @@ def message_board(trip_id):
         ).scalar_one_or_none()
         if participation is None:
             abort(403)
+    
+    if proposal.status not in [ProposalStatus.open, ProposalStatus.closed]:
+        flash(f"Message board is now read-only as the trip proposal's status is: {proposal.status.value}.")
 
     query = db.select(Message).where(Message.proposal_id == trip_id).order_by(Message.timestamp)
     messages = db.session.execute(query).scalars().all()
-    return render_template("main/message_board.html", trip_id=trip_id, messages=messages)
+    return render_template("main/message_board.html", trip_id=trip_id, messages=messages, proposal=proposal)
 
 @bp.route("/trip/<int:trip_id>/message_board", methods=["POST"])
 @flask_login.login_required
@@ -58,6 +61,11 @@ def post_message(trip_id):
         ).scalar_one_or_none()
         if participation is None:
             abort(403)
+
+    # Check if proposal allows messages (open or closed)
+    if proposal.status not in [ProposalStatus.open, ProposalStatus.closed]:
+        flash("Cannot post messages - the trip proposal is not open or closed.")
+        return redirect(url_for("main.message_board", trip_id=trip_id))
 
     # Validate description length
     if len(message) > 1000:

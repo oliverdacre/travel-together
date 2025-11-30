@@ -34,6 +34,7 @@
     </ul>
   </div>
 
+  {% if proposal.status.name in ['open', 'closed'] %}
   <div class="message-form-card">
     <form method="post" action="{{ url_for('main.post_message', trip_id=trip_id) }}" id="messageForm" enctype="multipart/form-data">
       <div class="form-group">
@@ -47,6 +48,7 @@
       </div>
     </form>
   </div>
+  {% endif %}
 </div>
 
 <script>
