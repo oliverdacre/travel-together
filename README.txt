@@ -3,6 +3,7 @@ Authors:
 - 100576034 - ZOFIA ROZANSKA
 - 100574986 - OLIVER RANULPH DE VAUX DACRE
 
+
 Additional functionality:
 1. Pictures in messages: users can attatch pictures (1 or more) to their messages on the message board.
 2. Image gallery: all images from all messages are collected in the image gallery and can be viewed separately from the messages.
@@ -10,11 +11,13 @@ Additional functionality:
 2. Profile pictures: users can choose their own profile pictures while editing their profile info.
 3. User Rating System: After the trip is finished, every user can rate all the other users on a scale 1-5. Average rating is displayed on the user's profile page.
 
+
 Users in the database:
 ...
 
 AI declaration:
-...
+Zofia:
+I used Visual Studio Code Copilot as an auto-completion assistant. I also used ChatGPT to look for errors. I used them to develop the trip route and trip jinja templates.
 
 Oliver:
 I used Visual Studio Code's built-in AI auto-completion feature with the Claude Sonnet 4.5 model. This helped me with the models file and the message board and gallery features.
