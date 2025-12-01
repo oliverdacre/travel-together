@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, redirect, url_for, request, flash,
 import flask_login
 from datetime import datetime
 from . import db
-from .model import TripProposal, ProposalStatus, TripProposalParticipation, UserRating
+from .model import TripProposal, ProposalStatus, TripProposalParticipation, UserRating, Meetup
 
 bp = Blueprint("trip", __name__, url_prefix="/trip")
 
@@ -111,11 +111,22 @@ def detail(trip_id):
             ).scalars().all()
         )
 
+    meetups = []
+    if is_participant:
+        meetups = (
+            db.session.execute(
+                db.select(Meetup).where(
+                    Meetup.proposal_id == trip_id
+                ).order_by(Meetup.scheduled_time)
+            ).scalars().all()
+        )
+
     return render_template(
         "trip/detail.html",
         proposal=proposal,
         participants=participants,
         is_participant=is_participant,
+        meetups=meetups,
         current_time=datetime.utcnow(),
     )
 
@@ -585,6 +596,74 @@ def submit_ratings(trip_id):
 
     db.session.commit()
     flash("Your ratings have been submitted!")
+    return redirect(url_for("trip.detail", trip_id=trip_id))
+
+
+@bp.route("/<int:trip_id>/meetup/new", methods=["GET"])
+@flask_login.login_required
+def new_meetup(trip_id):
+    proposal = db.session.get(TripProposal, trip_id)
+    if not proposal:
+        abort(404)
+    
+    current_user = flask_login.current_user
+    
+    # editors can create meetups
+    if current_user not in proposal.editors:
+        flash("You do not have permission to create meetups for this trip.")
+        return redirect(url_for("trip.detail", trip_id=trip_id))
+    
+    return render_template("trip/new_meetup.html", proposal=proposal)
+
+
+@bp.route("/<int:trip_id>/meetup/new", methods=["POST"])
+@flask_login.login_required
+def new_meetup_post(trip_id):
+    proposal = db.session.get(TripProposal, trip_id)
+    if not proposal:
+        abort(404)
+    
+    current_user = flask_login.current_user
+    
+    # editors can create meetups
+    if current_user not in proposal.editors:
+        flash("You do not have permission to create meetups for this trip.")
+        return redirect(url_for("trip.detail", trip_id=trip_id))
+    
+    location = request.form.get("location", "").strip()
+    scheduled_time_str = request.form.get("scheduled_time", "").strip()
+    scheduled_date = request.form.get("scheduled_date", "").strip()
+    
+    if not location:
+        flash("Please provide a location for the meetup.")
+        return redirect(url_for("trip.new_meetup", trip_id=trip_id))
+    
+    if not scheduled_date or not scheduled_time_str:
+        flash("Please provide both date and time for the meetup.")
+        return redirect(url_for("trip.new_meetup", trip_id=trip_id))
+    
+    try:
+        datetime_str = f"{scheduled_date} {scheduled_time_str}"
+        scheduled_time = datetime.strptime(datetime_str, "%Y-%m-%d %H:%M")
+    except ValueError:
+        flash("Invalid date or time format. Please use YYYY-MM-DD for date and HH:MM for time.")
+        return redirect(url_for("trip.new_meetup", trip_id=trip_id))
+    
+    if len(location) > 200:
+        flash("Location is too long (maximum 200 characters)")
+        return redirect(url_for("trip.new_meetup", trip_id=trip_id))
+    
+    new_meetup = Meetup(
+        proposal_id=trip_id,
+        creator_id=current_user.id,
+        location=location,
+        scheduled_time=scheduled_time
+    )
+    
+    db.session.add(new_meetup)
+    db.session.commit()
+    
+    flash("Meetup created successfully!")
     return redirect(url_for("trip.detail", trip_id=trip_id))
 
 

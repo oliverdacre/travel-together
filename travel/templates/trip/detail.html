@@ -69,6 +69,10 @@
 </div>
 {% endif %}
 
+{% if is_participant %}
+{% include 'trip/meetups.html' %}
+{% endif %}
+
 
 {% if is_participant %}
 {% include 'trip/gallery.html' %}

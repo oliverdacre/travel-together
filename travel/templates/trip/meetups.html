@@ -1,0 +1,32 @@
+<div class="card">
+  <h2>📅 Scheduled Meetups</h2>
+  
+  {% if current_user in proposal.editors %}
+    <div style="margin-bottom: 15px;">
+      <a href="{{ url_for('trip.new_meetup', trip_id=proposal.id) }}" class="btn btn-primary">
+        ➕ Create New Meetup
+      </a>
+    </div>
+  {% endif %}
+
+  {% if meetups %}
+    <ul style="list-style: none; padding: 0;">
+      {% for meetup in meetups %}
+        <li style="border: 1px solid #ddd; border-radius: 5px; padding: 15px; margin-bottom: 10px; background-color: #f9f9f9;">
+          <div style="display: flex; justify-content: space-between; align-items: start;">
+            <div>
+              <p style="margin: 5px 0;"><strong>📍 Location:</strong> {{ meetup.location }}</p>
+              <p style="margin: 5px 0;"><strong>📅 Date & Time:</strong> {{ meetup.scheduled_time.strftime('%Y-%m-%d at %H:%M') }}</p>
+              <p style="margin: 5px 0; color: #666; font-size: 0.9em;">
+                Created by <a href="{{ url_for('profile.profile', user_id=meetup.creator_id) }}">{{ meetup.creator.name }}</a>
+              </p>
+            </div>
+          </div>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="text-muted">No meetups scheduled yet.</p>
+  {% endif %}
+</div>
+

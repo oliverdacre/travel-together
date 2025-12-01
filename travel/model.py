@@ -116,10 +116,12 @@ class TripProposalParticipation(db.Model):
 class Meetup(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)
     proposal_id: Mapped[int] = mapped_column(ForeignKey("trip_proposal.id"), nullable=False)
+    creator_id: Mapped[int] = mapped_column(ForeignKey("user.id"), nullable=False)
     location: Mapped[str] = mapped_column(String(200), nullable=False)
     scheduled_time: Mapped[datetime.datetime] = mapped_column(DateTime, nullable=False)
 
     proposal = relationship("TripProposal", back_populates="meetups")
+    creator = relationship("User", foreign_keys=[creator_id])
 
 class Message(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)
