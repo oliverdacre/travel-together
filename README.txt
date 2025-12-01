@@ -15,3 +15,6 @@ Users in the database:
 
 AI declaration:
 ...
+
+Oliver:
+I used Visual Studio Code's built-in AI auto-completion feature with the Claude Sonnet 4.5 model. This helped me with the models file and the message board and gallery features.
