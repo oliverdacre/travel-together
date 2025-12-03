@@ -14,7 +14,12 @@
           <li class="message-item" data-message-id="{{ message.id }}">
             <div>
               <a href="{{ url_for('profile.profile', user_id=message.user.id) }}" class="message-author">
-                👤 {{ message.user.name }}
+                {% if message.user.profile_photo %}
+                <img src="{{ url_for('main.uploaded_file', filename=message.user.profile_photo) }}" alt="Profile photo" class="profile-photo-small">
+                {% else %}
+                <div class="profile-icon-small">👤</div>
+                {% endif %}
+                {{ message.user.name }}
               </a>
             </div>
             <div class="message-content">{{ message.content }}</div>
