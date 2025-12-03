@@ -8,28 +8,27 @@
 <div class="card">
   <h2>📋 Details</h2>
 
-<p><strong>📝 Description:</strong><br>
+<p><strong>📝{{ '🔒' if proposal.description_final else '🔓' }} Description:</strong><br>
   {{ proposal.description or "No description provided." }}
 </p>
 
-<p><strong>📍 Destination:</strong> {{ proposal.destination or "Not specified" }}</p>
+<p><strong>📍{{ '🔒' if proposal.destination_final else '🔓' }} Destination:</strong> {{ proposal.destination or "Not specified" }}</p>
 
 {% if proposal.budget %}
-  <p><strong>💰 Budget:</strong> {{ proposal.budget }} EUR</p>
+  <p><strong>💰{{ '🔒' if proposal.budget_final else '🔓' }} Budget:</strong> {{ proposal.budget }} EUR</p>
 {% endif %}
 
 {% if proposal.departure_locations %}
-  <p><strong>🚂 Departure locations:</strong> {{ proposal.departure_locations }}</p>
+  <p><strong>🚂{{ '🔒' if proposal.departure_locations_final else '🔓' }} Departure locations:</strong> {{ proposal.departure_locations }}</p>
 {% endif %}
 
 {% if proposal.activities %}
-  <p><strong>🎯 Planned activities:</strong> {{ proposal.activities }}</p>
+  <p><strong>🎯{{ '🔒' if proposal.activities_final else '🔓' }} Planned activities:</strong> {{ proposal.activities }}</p>
 {% endif %}
 
-<p><strong>📅 Start date:</strong> {{ proposal.start_date.strftime('%Y-%m-%d') }}</p>
-<p><strong>📅 End date:</strong> {{ proposal.end_date.strftime('%Y-%m-%d') }}</p>
-
-<p><strong>👥 Max participants:</strong> {{ proposal.max_participants }}</p>
+<p><strong>📅{{ '🔒' if proposal.start_date_final else '🔓' }} Start date:</strong> {{ proposal.start_date.strftime('%Y-%m-%d') }}</p>
+<p><strong>📅{{ '🔒' if proposal.end_date_final else '🔓' }} End date:</strong> {{ proposal.end_date.strftime('%Y-%m-%d') }}</p>
+<p><strong>👥{{ '🔒' if proposal.max_participants_final else '🔓' }} Max participants:</strong> {{ proposal.max_participants }}</p>
 <p><strong>📊 Status:</strong> {{ proposal.status.value }}</p>
 
 </div>
