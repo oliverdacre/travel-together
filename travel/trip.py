@@ -435,6 +435,47 @@ def add_editor(trip_id):
     flash("User has been granted editor permissions!", "success")
     return redirect(url_for("trip.detail", trip_id=trip_id))
 
+@bp.route("/<int:trip_id>/remove_editor", methods=["POST"])
+@flask_login.login_required
+def remove_editor(trip_id):
+    proposal = TripProposal.query.get_or_404(trip_id)
+    current_user = flask_login.current_user
+
+    if current_user not in proposal.editors:
+        abort(403)
+
+    if proposal.status not in [ProposalStatus.open, ProposalStatus.closed]:
+        flash("Cannot modify editors for a trip that is finalized or cancelled.", "danger")
+        return redirect(url_for("trip.detail", trip_id=trip_id))
+
+    user_id = request.form.get("user_id")
+
+    if not user_id:
+        flash("No user selected.", "danger")
+        return redirect(url_for("trip.detail", trip_id=trip_id))
+
+    participation = TripProposalParticipation.query.filter_by(
+        proposal_id=trip_id,
+        user_id=user_id
+    ).first()
+
+    if not participation:
+        flash("The selected user is not a participant.", "danger")
+        return redirect(url_for("trip.detail", trip_id=trip_id))
+    if not participation.is_editor:
+        flash("This user is not an editor.", "warning")
+        return redirect(url_for("trip.detail", trip_id=trip_id))
+
+    if participation.user == current_user and len(proposal.editors) == 1:
+        flash("You are the only editor. Please assign another editor before removing yourself.", "danger")
+        return redirect(url_for("trip.detail", trip_id=trip_id))
+
+    participation.is_editor = False
+    db.session.commit()
+
+    flash("User's editor permissions have been revoked!", "success")
+    return redirect(url_for("trip.detail", trip_id=trip_id))
+
 @bp.route("/<int:trip_id>/finalize", methods=["POST"])
 @flask_login.login_required
 def finalize_proposal(trip_id):

@@ -12,8 +12,7 @@
   <br>
 
   <div>
-
-    <form action="{{ url_for('trip.add_editor', trip_id=proposal.id) }}" method="POST">
+    <form action="{{ url_for('trip.add_editor', trip_id=proposal.id) }}" method="POST" class="flex gap-sm">
 
       <div class="form-group">
         <select name="user_id" required>
@@ -28,10 +27,33 @@
         </select>
       </div>
 
-      <button class="btn btn-primary">➕ Add editor</button>
+      <button class="btn btn-success">➕ Add editor</button>
     </form>
   </div>
   
+  <br>
+
+
+  <div>
+    <form action="{{ url_for('trip.remove_editor', trip_id=proposal.id) }}" method="POST" class="flex gap-sm">
+
+      <div class="form-group">
+        <select name="user_id" required>
+          <option value="" disabled selected>Select editor…</option>
+          {% for participant in proposal.participants %}
+            {% if participant.is_editor  and participant.id != current_user.id %}
+              <option value="{{ participant.user.id }}">
+                {{ participant.user.name }} ({{ participant.user.email }})
+              </option>
+            {% endif %}
+          {% endfor %}
+        </select>
+      </div>
+
+      <button class="btn btn-danger">➖ Remove editor</button>
+    </form>
+  </div>
+
   <br>
   {% endif %}
   
